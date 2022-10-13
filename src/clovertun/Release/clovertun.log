@@ -1,0 +1,25 @@
+﻿Build started 2022/10/13 11:29:45.
+     1>Project "C:\code\networktest\src\clovertun\clovertun.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\code\networktest\include/BaseObject /IC:\code\networktest\include/clovertun /IC:\code\networktest\include/corelib /IC:\code\networktest\3rdparty/msquic/include /IC:\code\networktest\3rdparty/enet/include /Zi /nologo /W4 /WX- /sdl /Od /Oi /Oy- /GL /D WIN32 /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /wd4996 /analyze- /errorReport:prompt QUICClient.cpp QUICServer.cpp
+         QUICClient.cpp
+     1>QUICClient.cpp(168): warning C4244: 'argument' : conversion from 'uint64_t' to 'DWORD', possible loss of data
+         QUICServer.cpp
+     1>QUICServer.cpp(348): warning C4244: 'argument' : conversion from 'uint64_t' to 'DWORD', possible loss of data
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"C:\code\networktest\Release\clovertun.lib" /NOLOGO /LTCG Release\ENetClient.obj
+         Release\QUICBase.obj
+         Release\QUICClient.obj
+         Release\QUICServer.obj
+         Release\TCPBase.obj
+         Release\TCPClient.obj
+         Release\TCPCommon.obj
+         Release\TCPServer.obj
+         Release\UDPBase.obj
+         Release\UDPCommon.obj
+         clovertun.vcxproj -> C:\code\networktest\Release\clovertun.lib
+     1>Done Building Project "C:\code\networktest\src\clovertun\clovertun.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.08

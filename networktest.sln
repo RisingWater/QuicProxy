@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "corelib", "src\corelib\corelib.vcxproj", "{6162410E-47FD-4B76-9D7D-37BE6A41293A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clovertun", "src\clovertun\clovertun.vcxproj", "{E08A53BF-7B8A-4561-AEC3-53C926F680C6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "networktest", "src\clovertun\test\networktest.vcxproj", "{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6162410E-47FD-4B76-9D7D-37BE6A41293A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6162410E-47FD-4B76-9D7D-37BE6A41293A}.Debug|Win32.Build.0 = Debug|Win32
+		{6162410E-47FD-4B76-9D7D-37BE6A41293A}.Release|Win32.ActiveCfg = Release|Win32
+		{6162410E-47FD-4B76-9D7D-37BE6A41293A}.Release|Win32.Build.0 = Release|Win32
+		{E08A53BF-7B8A-4561-AEC3-53C926F680C6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E08A53BF-7B8A-4561-AEC3-53C926F680C6}.Debug|Win32.Build.0 = Debug|Win32
+		{E08A53BF-7B8A-4561-AEC3-53C926F680C6}.Release|Win32.ActiveCfg = Release|Win32
+		{E08A53BF-7B8A-4561-AEC3-53C926F680C6}.Release|Win32.Build.0 = Release|Win32
+		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Debug|Win32.Build.0 = Debug|Win32
+		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Release|Win32.ActiveCfg = Release|Win32
+		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="UDPBase.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPCommon.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPBase.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPClient.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPServer.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPCommon.cpp">
+      <Filter>UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="ENetClient.cpp">
+      <Filter>ENet</Filter>
+    </ClCompile>
+    <ClCompile Include="QUICServer.cpp">
+      <Filter>QUIC</Filter>
+    </ClCompile>
+    <ClCompile Include="QUICBase.cpp">
+      <Filter>QUIC</Filter>
+    </ClCompile>
+    <ClCompile Include="QUICClient.cpp">
+      <Filter>QUIC</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="UDPBase.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPCommon.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPBase.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPClient.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPServer.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="UDPCommon.h">
+      <Filter>UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="ENetClient.h">
+      <Filter>ENet</Filter>
+    </ClInclude>
+    <ClInclude Include="QUICServer.h">
+      <Filter>QUIC</Filter>
+    </ClInclude>
+    <ClInclude Include="QUICBase.h">
+      <Filter>QUIC</Filter>
+    </ClInclude>
+    <ClInclude Include="QUICClient.h">
+      <Filter>QUIC</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="UDP">
+      <UniqueIdentifier>{46e7728f-ee67-489e-b4db-423d8565fadf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TCP">
+      <UniqueIdentifier>{5a596833-ad57-4d66-b945-ad23398d24c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ENet">
+      <UniqueIdentifier>{412907e4-e6d4-42ec-a831-d089de5ef284}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="QUIC">
+      <UniqueIdentifier>{5752a921-0acd-48d6-a83c-56332606aba6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
