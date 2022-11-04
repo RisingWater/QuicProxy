@@ -12,8 +12,6 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 SET(CMAKE_C_FLAGS "-fPIC")
 SET(CMAKE_CXX_FLAGS "-fPIC")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
 
 LIST(APPEND SRC_FILES
     DataStreamBuf.cpp
