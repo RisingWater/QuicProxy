@@ -161,7 +161,7 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
 
 #define ERR_MASK (POLLHUP | POLLERR | POLLNVAL | POLLRDHUP)
 
-BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockaddr* addr, DWORD* addrLen, HANDLE hStopEvent)
+BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvLength, struct sockaddr* addr, DWORD* addrLen, HANDLE hStopEvent)
 {
     struct pollfd fds[2];
 
@@ -239,6 +239,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct socka
             }
             else
             {
+                *RecvLength = dwReaded;
                 return TRUE;
             }
         }

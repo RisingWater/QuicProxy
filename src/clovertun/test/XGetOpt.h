@@ -5,12 +5,11 @@
  *
  * @date     2011/6/8
  *
- * @brief    »ùÓÚXGetOpt, http://www.codeproject.com/KB/cpp/xgetopt.aspx
+ * @brief    ï¿½ï¿½ï¿½ï¿½XGetOpt, http://www.codeproject.com/KB/cpp/xgetopt.aspx
  *
  * @version
  *
  *----------------------------------------------------------------------------*/
-#include <tchar.h>
 #include <string.h>
 
 static int optind = 0;

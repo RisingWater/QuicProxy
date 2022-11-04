@@ -4,7 +4,6 @@
 #define __QUIC_BASE_H__
 
 #include "msquic.h"
-#include "msquic_winuser.h"
 #include "BaseObject.h"
 #include "packetunit.h"
 #include <list>

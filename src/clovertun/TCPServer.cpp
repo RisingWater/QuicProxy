@@ -156,7 +156,7 @@ BOOL CTCPService::ListenProcess(HANDLE StopEvent)
 
     SOCKET s = accept(m_hListenSock, NULL, NULL);
 
-    if (s == NULL || s == INVALID_SOCKET)
+    if (s == 0 || s == INVALID_SOCKET)
     {
         return FALSE;
     }

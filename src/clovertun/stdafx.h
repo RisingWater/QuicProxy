@@ -11,6 +11,7 @@
 #include <WinSock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+#include <tchar.h>
 #pragma warning(disable:4127)
 #pragma warning(disable:4996)
 #else
@@ -19,6 +20,7 @@
 #include "winpr/tchar.h"
 #include "winpr/file.h"
 #include "winpr/synch.h"
+#include "winpr/thread.h"
 #include "winpr/interlocked.h"
 #endif
 

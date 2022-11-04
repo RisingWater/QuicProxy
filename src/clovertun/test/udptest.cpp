@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "UDPBase.h"
-#include "enet/enet.h"
 #include "packetunit.h"
 
 #define DATA_SIZE (64 * 1024)

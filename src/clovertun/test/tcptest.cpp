@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "TCPServer.h"
 #include "TCPClient.h"
-#include "enet/enet.h"
 #include "packetunit.h"
 
 #define DATA_SIZE (64 * 1024)

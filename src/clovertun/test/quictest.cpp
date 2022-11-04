@@ -1,16 +1,37 @@
 #include "stdafx.h"
 #include "QUICServer.h"
 #include "QUICClient.h"
-#include "enet/enet.h"
 #include "packetunit.h"
 
 #define DATA_SIZE (64 * 1024)
+
+#ifdef WIN32
+#define CERT_PATH "C:\\code\\networkSample\\cert\\ca.crt"
+#define KEY_PATH  "C:\\code\\networkSample\\cert\\ca.key"
+#else
+#define CERT_PATH "/home/wangxu/workdir/networkSample/cert/ca.crt"
+#define KEY_PATH  "/home/wangxu/workdir/networkSample/cert/ca.key"
+#endif
 
 extern HANDLE g_StopEvent;
 extern DWORD  g_RecvBytes;
 extern CRITICAL_SECTION g_RecvByetLock;
 
 static BOOL QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param)
+{
+    EnterCriticalSection(&g_RecvByetLock);
+    g_RecvBytes += Length;
+    LeaveCriticalSection(&g_RecvByetLock);
+
+    CQUICServer* pServer = dynamic_cast<CQUICServer*>(quic);
+    PBYTE Data2 = (PBYTE)malloc(DATA_SIZE);
+    pServer->SendPacket(Data2, DATA_SIZE);
+    free(Data2);
+
+    return TRUE;
+}
+
+static BOOL QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param)
 {
     EnterCriticalSection(&g_RecvByetLock);
     g_RecvBytes += Length;
@@ -42,7 +63,7 @@ void QUICServerTest(int port)
 {
     CQUICService* QUICService = NULL;
 
-    QUICService = new CQUICService(port, "xredtest", "C:\\code\\networktest\\cert\\ca.crt", "C:\\code\\networktest\\cert\\ca.key");
+    QUICService = new CQUICService(port, "xredtest", CERT_PATH, KEY_PATH);
     if (QUICService)
     {
         QUICService->RegisterConnectedProcess(QUICClientConnectedProcess, NULL);
@@ -64,6 +85,7 @@ void QUICClientTest(char* address, int port)
     QUICClient = new CQUICClient(address, port, "xredtest");
     if (QUICClient)
     {
+        QUICClient->RegisterRecvProcess(QUICClientRecvPacketProcess, NULL);
         QUICClient->RegisterEndProcess(QUICDisconnectedProcess, NULL);
         if (QUICClient->Init())
         {

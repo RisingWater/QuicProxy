@@ -1,7 +1,9 @@
 ﻿#include "stdafx.h"
 #include "XGetOpt.h"
+#ifdef WIN32
+#define ENET_SUPPORT
 #include "enet/enet.h"
-
+#endif
 typedef enum
 {
     TCP_SERVER = 0,
@@ -32,8 +34,10 @@ extern void TCPClientTest(char* address, int port);
 extern void UDPServerTest(int port);
 extern void UDPClientTest(char* address, int port);
 
+#ifdef ENET_SUPPORT
 extern void ENetServerTest(int port);
 extern void ENetClientTest(char* address, int port);
+#endif
 
 extern void QUICServerTest(int port);
 extern void QUICClientTest(char* address, int port);
@@ -79,7 +83,9 @@ int main(int argc,char * argv[])
 
     g_StopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
+#ifdef ENET_SUPPORT
     enet_initialize();
+#endif
 
 	while ((c = getopt(argc, argv, _T("t:a:p:"))) != -1)
     {
@@ -141,7 +147,7 @@ int main(int argc,char * argv[])
         return -1;
     }
 
-    if (isServer)
+    if (isServer || roleType == QUIC_CLIENT)
     {
         CreateThread(NULL, 0, TimerProc, NULL, 0, NULL);
     }
@@ -160,12 +166,14 @@ int main(int argc,char * argv[])
         case UDP_CLIENT:
             UDPClientTest(ipAddr, port);
             break;
+#ifdef ENET_SUPPORT            
         case ENET_SERVER:
             ENetServerTest(port);
             break;
         case ENET_CLIENT:
             ENetClientTest(ipAddr, port);
             break;
+#endif            
         case QUIC_SERVER:
             QUICServerTest(port);
             break;
@@ -176,8 +184,9 @@ int main(int argc,char * argv[])
             DBG_ERROR("ERROR: unknow type\n");
             break;
     }
-
+#ifdef ENET_SUPPORT
     enet_deinitialize();
+#endif    
 
     DeleteCriticalSection(&g_RecvByetLock);
 }

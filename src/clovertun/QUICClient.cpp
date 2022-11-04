@@ -43,7 +43,7 @@ BOOL CQUICClient::Init()
 
     DBG_INFO("[conn][%p] Connecting...\n", m_hConnection);
 
-    Status = m_pMsQuic->ConnectionStart(m_hConnection, m_hConfiguration, QUIC_ADDRESS_FAMILY_UNSPEC, m_szIPAddress, m_wDstPort);
+    Status = m_pMsQuic->ConnectionStart(m_hConnection, m_hConfiguration, QUIC_ADDRESS_FAMILY_INET, m_szIPAddress, m_wDstPort);
 
     if (QUIC_FAILED(Status))
     {
@@ -95,7 +95,7 @@ VOID CQUICClient::LoadConfiguration()
 
     Status = m_pMsQuic->ConfigurationLoadCredential(m_hConfiguration, &CredConfig);
 
-    if (QUIC_FAILED(m_pMsQuic))
+    if (QUIC_FAILED(Status))
     {
         printf("ConfigurationLoadCredential failed, 0x%x!\n", Status);
         return;
@@ -165,7 +165,7 @@ QUIC_STATUS CQUICClient::ClientStreamCallback(
                 EnterCriticalSection(&pClient->m_csLock);
                 if (pClient->m_pfnRecvFunc)
                 {
-                    pClient->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, Event->RECEIVE.TotalBufferLength, pClient, pClient->m_pRecvParam);
+                    pClient->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, (DWORD)Event->RECEIVE.TotalBufferLength, pClient, pClient->m_pRecvParam);
                 }
                 LeaveCriticalSection(&pClient->m_csLock);
             }
@@ -239,7 +239,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
             }
             else
             {
-                DBG_INFO("[conn][%p] Shut down by transport, 0x%x\n", Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
+                DBG_INFO("[conn][%p] Shut down by transport, Status 0x%x, ErrorCode 0x%llu\n", Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode);
             }
             break;
         }
@@ -263,10 +263,10 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
         case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
         {
             DBG_INFO("[conn][%p] Resumption ticket received (%u bytes):\n", Connection, Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength);
-            for (uint32_t i = 0; i < Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength; i++) {
-                DBG_INFO("%.2X", (uint8_t)Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicket[i]);
-            }
-            DBG_INFO("\n");
+            //for (uint32_t i = 0; i < Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength; i++) {
+            //    DBG_INFO("%.2X", (uint8_t)Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicket[i]);
+            //}
+            //DBG_INFO("\n");
             break;
         }
     default:

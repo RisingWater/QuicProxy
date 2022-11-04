@@ -1,2 +1,3 @@
 ADD_SUBDIRECTORY(corelib)
 ADD_SUBDIRECTORY(clovertun)
+ADD_SUBDIRECTORY(clovertun/test)

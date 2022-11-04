@@ -73,7 +73,7 @@ BOOL CQUICService::Init()
     BaseInit(QUICBASE_HIGH_THOUGHPUT);
 
     QUIC_ADDR Address = { 0 };
-    QuicAddrSetFamily(&Address, QUIC_ADDRESS_FAMILY_UNSPEC);
+    QuicAddrSetFamily(&Address, QUIC_ADDRESS_FAMILY_INET);
     QuicAddrSetPort(&Address, m_wUdpPort);
 
     LoadConfiguration();
@@ -124,7 +124,7 @@ QUIC_STATUS CQUICService::ServerListenerCallback(
     _Inout_ QUIC_LISTENER_EVENT* Event
     )
 {
-    UNREFERENCED_PARAMETER(Listener);
+    Listener;
 
     CQUICService* pService = (CQUICService*)Context;
 
@@ -345,7 +345,7 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
                 EnterCriticalSection(&pServer->m_csLock);
                 if (pServer->m_pfnRecvFunc)
                 {
-                    pServer->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, Event->RECEIVE.TotalBufferLength, pServer, pServer->m_pRecvParam);
+                    pServer->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, (DWORD)Event->RECEIVE.TotalBufferLength, pServer, pServer->m_pRecvParam);
                 }
                 LeaveCriticalSection(&pServer->m_csLock);
             }
