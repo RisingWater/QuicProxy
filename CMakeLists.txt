@@ -14,13 +14,20 @@ MESSAGE(STATUS "Build system name: ${CMAKE_SYSTEM_NAME}")
 MESSAGE(STATUS "Build system processor: ${CMAKE_SYSTEM_PROCESSOR}")
 MESSAGE(STATUS "Build system version: ${CMAKE_SYSTEM_VERSION}")
 
-OPTION(FORMACOS "on for MacOS" On)
+OPTION(FORMACOS "on for MacOS" Off)
+OPTION(FORLINUX "on for Linux" On)
 
 IF (FORMACOS)
     MESSAGE(STATUS "    ---------->> MacOS Platform")
     ADD_DEFINITIONS(-DMACOS)
     SET(LIB_PLATFORM MacOS)
 ENDIF (FORMACOS)
+
+IF (FORLINUX)
+    MESSAGE(STATUS "    ---------->> Linux Platform")
+    ADD_DEFINITIONS(-DLINUX)
+    SET(LIB_PLATFORM Linux/${CMAKE_HOST_SYSTEM_PROCESSOR})
+ENDIF (FORLINUX)
 
 MESSAGE(STATUS "Checking option ...")
 MESSAGE(STATUS "    ---------->> Lib platform: ${LIB_PLATFORM}")
