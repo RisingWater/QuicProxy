@@ -56,7 +56,7 @@ BOOL CTCPClient::Init()
 
 VOID CTCPClient::Done()
 {
-    DBG_TRACE("ctcpclient done\r\n");
+    DBG_TRACE(_T("ctcpclient done\r\n"));
     RegisterRecvProcess(NULL, NULL);
     RegisterEndProcess(NULL, NULL);
 

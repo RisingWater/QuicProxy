@@ -21,7 +21,7 @@ BOOL IQUICBase::BaseInit(QUICBASE_TYPE Type)
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("MsQuicOpen2 failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("MsQuicOpen2 failed, 0x%x!\n"), Status);
         goto Error;
     }
 
@@ -31,7 +31,7 @@ BOOL IQUICBase::BaseInit(QUICBASE_TYPE Type)
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("RegistrationOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("RegistrationOpen failed, 0x%x!\n"), Status);
         goto Error;
     }
 

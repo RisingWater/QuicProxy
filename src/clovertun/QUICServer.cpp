@@ -43,7 +43,7 @@ void CQUICService::LoadConfiguration()
     QUIC_STATUS Status = m_pMsQuic->ConfigurationOpen(m_hRegistration, &m_stKeyword, 1, &Settings, sizeof(Settings), NULL, &m_hConfiguration);
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ConfigurationOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ConfigurationOpen failed, 0x%x!\n"), Status);
         return;
     }
 
@@ -61,7 +61,7 @@ void CQUICService::LoadConfiguration()
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ConfigurationLoadCredential failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ConfigurationLoadCredential failed, 0x%x!\n"), Status);
         return;
     }
 
@@ -83,7 +83,7 @@ BOOL CQUICService::Init()
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ListenerOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ListenerOpen failed, 0x%x!\n"), Status);
         goto Error;
     }
 
@@ -91,7 +91,7 @@ BOOL CQUICService::Init()
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ListenerStart failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ListenerStart failed, 0x%x!\n"), Status);
         goto Error;
     }
 
@@ -169,7 +169,7 @@ QUIC_STATUS CQUICService::ServerConnectionCallback(
     {
         case QUIC_CONNECTION_EVENT_CONNECTED:
         {
-            DBG_INFO("[conn][%p] Connected\n", Connection);
+            DBG_INFO(_T("[conn][%p] Connected\n"), Connection);
             if (pService)
             {
                 pService->m_pMsQuic->ConnectionSendResumptionTicket(Connection, QUIC_SEND_RESUMPTION_FLAG_NONE, 0, NULL);
@@ -180,22 +180,22 @@ QUIC_STATUS CQUICService::ServerConnectionCallback(
         {
             if (Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status == QUIC_STATUS_CONNECTION_IDLE)
             {
-                DBG_INFO("[conn][%p] Successfully shut down on idle.\n", Connection);
+                DBG_INFO(_T("[conn][%p] Successfully shut down on idle.\n"), Connection);
             }
             else
             {
-                DBG_INFO("[conn][%p] Shut down by transport, 0x%x\n", Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
+                DBG_INFO(_T("[conn][%p] Shut down by transport, 0x%x\n"), Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
             }
             break;
         }
         case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER:
         {
-            DBG_INFO("[conn][%p] Shut down by peer, 0x%llu\n", Connection, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_PEER.ErrorCode);
+            DBG_INFO(_T("[conn][%p] Shut down by peer, 0x%llu\n"), Connection, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_PEER.ErrorCode);
             break;
         }
         case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE:
         {
-            DBG_INFO("[conn][%p] All done\n", Connection);
+            DBG_INFO(_T("[conn][%p] All done\n"), Connection);
             if (pService)
             {
                 pService->m_pMsQuic->ConnectionClose(Connection);
@@ -207,7 +207,7 @@ QUIC_STATUS CQUICService::ServerConnectionCallback(
         {
             if (pService)
             {
-                DBG_INFO("[strm][%p] Peer started\n", Event->PEER_STREAM_STARTED.Stream);
+                DBG_INFO(_T("[strm][%p] Peer started\n"), Event->PEER_STREAM_STARTED.Stream);
 
                 EnterCriticalSection(&pService->m_csLock);
 
@@ -228,7 +228,7 @@ QUIC_STATUS CQUICService::ServerConnectionCallback(
         }
         case QUIC_CONNECTION_EVENT_RESUMED:
         {
-            DBG_INFO("[conn][%p] Connection resumed!\n", Connection);
+            DBG_INFO(_T("[conn][%p] Connection resumed!\n"), Connection);
             break;
         }
         default:
@@ -298,7 +298,7 @@ void CQUICServer::CloseConnection()
     void* SendBufferRaw = malloc(sizeof(QUIC_BUFFER) + 4);
     if (SendBufferRaw == NULL)
     {
-        DBG_ERROR("SendBuffer allocation failed!\n");
+        DBG_ERROR(_T("SendBuffer allocation failed!\n"));
         m_pService->m_pMsQuic->StreamShutdown(m_hStream, QUIC_STREAM_SHUTDOWN_FLAG_ABORT, 0);
         return;
     }
@@ -306,12 +306,12 @@ void CQUICServer::CloseConnection()
     SendBuffer->Buffer = (uint8_t*)SendBufferRaw + sizeof(QUIC_BUFFER);
     SendBuffer->Length = 4;
 
-    DBG_INFO("[strm][%p] Sending CloseConnection...\n", m_hStream);
+    DBG_INFO(_T("[strm][%p] Sending CloseConnection...\n"), m_hStream);
 
     QUIC_STATUS Status = m_pService->m_pMsQuic->StreamSend(m_hStream, SendBuffer, 1, QUIC_SEND_FLAG_FIN, SendBuffer);
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("StreamSend failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("StreamSend failed, 0x%x!\n"), Status);
         free(SendBufferRaw);
         m_pService->m_pMsQuic->StreamShutdown(m_hStream, QUIC_STREAM_SHUTDOWN_FLAG_ABORT, 0);
     }
@@ -356,14 +356,14 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
         {
             if (pServer)
             {
-                DBG_INFO("[strm][%p] Peer shut down\n", Stream);
+                DBG_INFO(_T("[strm][%p] Peer shut down\n"), Stream);
                 pServer->CloseConnection();
             }
             break;
         }
         case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
         {
-            DBG_INFO("[strm][%p] Peer aborted\n", Stream);
+            DBG_INFO(_T("[strm][%p] Peer aborted\n"), Stream);
             if (pServer)
             {
                 pServer->m_pService->m_pMsQuic->StreamShutdown(Stream, QUIC_STREAM_SHUTDOWN_FLAG_ABORT, 0);
@@ -372,7 +372,7 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
         }
         case QUIC_STREAM_EVENT_SHUTDOWN_COMPLETE:
         {
-            DBG_INFO("[strm][%p] All done\n", Stream);
+            DBG_INFO(_T("[strm][%p] All done\n"), Stream);
 
             if (pServer)
             {
@@ -406,7 +406,7 @@ BOOL CQUICServer::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("StreamSend failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("StreamSend failed, 0x%x!\n"), Status);
         free(Node);
         return FALSE;
     }

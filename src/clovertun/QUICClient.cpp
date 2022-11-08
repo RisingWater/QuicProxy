@@ -36,24 +36,24 @@ BOOL CQUICClient::Init()
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ConnectionOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ConnectionOpen failed, 0x%x!\n"), Status);
         Release();
         goto Error;
     }
 
-    DBG_INFO("[conn][%p] Connecting...\n", m_hConnection);
+    DBG_INFO(_T("[conn][%p] Connecting...\n"), m_hConnection);
 
     Status = m_pMsQuic->ConnectionStart(m_hConnection, m_hConfiguration, QUIC_ADDRESS_FAMILY_INET, m_szIPAddress, m_wDstPort);
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ConnectionStart failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ConnectionStart failed, 0x%x!\n"), Status);
         goto Error;
     }
 
     if (WaitForSingleObject(m_hConnectOK, 10000) != WAIT_OBJECT_0)
     {
-        DBG_ERROR("Wait for connect time out\n");
+        DBG_ERROR(_T("Wait for connect time out\n"));
         goto Error;
     }
 
@@ -89,7 +89,7 @@ VOID CQUICClient::LoadConfiguration()
     QUIC_STATUS Status = m_pMsQuic->ConfigurationOpen(m_hRegistration, &m_stKeyword, 1, &Settings, sizeof(Settings), NULL, &m_hConfiguration);
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("ConfigurationOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("ConfigurationOpen failed, 0x%x!\n"), Status);
         return;
     }
 
@@ -112,18 +112,18 @@ void CQUICClient::InitializeConnection(HQUIC Connection)
     Status = m_pMsQuic->StreamOpen(Connection, QUIC_STREAM_OPEN_FLAG_NONE, ClientStreamCallback, this, &m_hStream);
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("StreamOpen failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("StreamOpen failed, 0x%x!\n"), Status);
         Release();
         goto Error;
     }
 
-    DBG_INFO("[strm][%p] Starting...\n", m_hStream);
+    DBG_INFO(_T("[strm][%p] Starting...\n"), m_hStream);
 
     Status = m_pMsQuic->StreamStart(m_hStream, QUIC_STREAM_START_FLAG_IMMEDIATE);
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("StreamStart failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("StreamStart failed, 0x%x!\n"), Status);
         m_pMsQuic->StreamClose(m_hStream);
         goto Error;
     }
@@ -174,17 +174,17 @@ QUIC_STATUS CQUICClient::ClientStreamCallback(
         }
         case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
         {
-            DBG_INFO("[strm][%p] Peer aborted\n", Stream);
+            DBG_INFO(_T("[strm][%p] Peer aborted\n"), Stream);
             break;
         }
         case QUIC_STREAM_EVENT_PEER_SEND_SHUTDOWN:
         {
-            DBG_INFO("[strm][%p] Peer shut down\n", Stream);
+            DBG_INFO(_T("[strm][%p] Peer shut down\n"), Stream);
             break;
         }
         case QUIC_STREAM_EVENT_SHUTDOWN_COMPLETE:
         {
-            DBG_INFO("[strm][%p] All done\n", Stream);
+            DBG_INFO(_T("[strm][%p] All done\n"), Stream);
             if (!Event->SHUTDOWN_COMPLETE.AppCloseInProgress) {
                 if (pClient)
                 {
@@ -224,7 +224,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
     {
         case QUIC_CONNECTION_EVENT_CONNECTED:
         {
-            DBG_INFO("[conn][%p] Connected\n", Connection);
+            DBG_INFO(_T("[conn][%p] Connected\n"), Connection);
             if (pClient)
             {
                 pClient->InitializeConnection(Connection);
@@ -235,24 +235,24 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
         {
             if (Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status == QUIC_STATUS_CONNECTION_IDLE)
             {
-                DBG_INFO("[conn][%p] Successfully shut down on idle.\n", Connection);
+                DBG_INFO(_T("[conn][%p] Successfully shut down on idle.\n"), Connection);
             }
             else
             {
-                DBG_INFO("[conn][%p] Shut down by transport, Status 0x%x, ErrorCode 0x%llu\n", Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode);
+                DBG_INFO(_T("[conn][%p] Shut down by transport, Status 0x%x, ErrorCode 0x%llu\n"), Connection, Event->SHUTDOWN_INITIATED_BY_TRANSPORT.Status, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode);
             }
             break;
         }
         case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER:
         {
-            DBG_INFO("[conn][%p] Shut down by peer, 0x%llu\n", Connection, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_PEER.ErrorCode);
+            DBG_INFO(_T("[conn][%p] Shut down by peer, 0x%llu\n"), Connection, (unsigned long long)Event->SHUTDOWN_INITIATED_BY_PEER.ErrorCode);
             break;
         }
         case QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE:
         {
             if (pClient)
             {
-                DBG_INFO("[conn][%p] All done\n", Connection);
+                DBG_INFO(_T("[conn][%p] All done\n"), Connection);
                 if (!Event->SHUTDOWN_COMPLETE.AppCloseInProgress)
                 {
                     pClient->m_pMsQuic->ConnectionClose(Connection);
@@ -262,7 +262,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
         }
         case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
         {
-            DBG_INFO("[conn][%p] Resumption ticket received (%u bytes):\n", Connection, Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength);
+            DBG_INFO(_T("[conn][%p] Resumption ticket received (%u bytes):\n"), Connection, Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength);
             //for (uint32_t i = 0; i < Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength; i++) {
             //    DBG_INFO("%.2X", (uint8_t)Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicket[i]);
             //}
@@ -289,7 +289,7 @@ BOOL CQUICClient::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
 
     if (QUIC_FAILED(Status))
     {
-        DBG_ERROR("StreamSend failed, 0x%x!\n", Status);
+        DBG_ERROR(_T("StreamSend failed, 0x%x!\n"), Status);
         free(Node);
         return FALSE;
     }

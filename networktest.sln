@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clovertun", "src\clovertun\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "networktest", "src\clovertun\test\networktest.vcxproj", "{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QuicProxy", "src\QuicProxy\QuicProxy.vcxproj", "{A5F27967-B008-48C1-8408-272B8CECA454}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnhanceLib", "src\EnhanceLib\EnhanceLib.vcxproj", "{4C30FB2E-7E5D-4E4F-AB23-E0F0CE6911D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +31,14 @@ Global
 		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Debug|Win32.Build.0 = Debug|Win32
 		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Release|Win32.ActiveCfg = Release|Win32
 		{CB2B6C1D-7A4B-4B3F-A57D-44B1AA96F740}.Release|Win32.Build.0 = Release|Win32
+		{A5F27967-B008-48C1-8408-272B8CECA454}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A5F27967-B008-48C1-8408-272B8CECA454}.Debug|Win32.Build.0 = Debug|Win32
+		{A5F27967-B008-48C1-8408-272B8CECA454}.Release|Win32.ActiveCfg = Release|Win32
+		{A5F27967-B008-48C1-8408-272B8CECA454}.Release|Win32.Build.0 = Release|Win32
+		{4C30FB2E-7E5D-4E4F-AB23-E0F0CE6911D3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C30FB2E-7E5D-4E4F-AB23-E0F0CE6911D3}.Debug|Win32.Build.0 = Debug|Win32
+		{4C30FB2E-7E5D-4E4F-AB23-E0F0CE6911D3}.Release|Win32.ActiveCfg = Release|Win32
+		{4C30FB2E-7E5D-4E4F-AB23-E0F0CE6911D3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

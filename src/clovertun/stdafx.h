@@ -24,9 +24,9 @@
 #include "winpr/interlocked.h"
 #endif
 
-#define DBG_ERROR printf
-#define DBG_WARN  printf
-#define DBG_INFO  printf
-#define DBG_TRACE printf
+#define DBG_ERROR _tprintf
+#define DBG_WARN  _tprintf
+#define DBG_INFO  _tprintf
+#define DBG_TRACE _tprintf
 
 #endif

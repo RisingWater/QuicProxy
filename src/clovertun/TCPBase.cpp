@@ -167,7 +167,7 @@ DWORD WINAPI CTCPBase::RecvProc(void* pParam)
     }
     LeaveCriticalSection(&tcp->m_csFunc);
 
-    DBG_INFO("CTCPBase: Recv Thread Stop\r\n");
+    DBG_INFO(_T("CTCPBase: Recv Thread Stop\r\n"));
 
     SetEvent(tcp->m_hStopEvent);
 
@@ -187,7 +187,7 @@ DWORD WINAPI CTCPBase::SendProc(void* pParam)
 		}
 	}
 
-    DBG_INFO("CTCPBase: Send Thread Stop\r\n");
+    DBG_INFO(_T("CTCPBase: Send Thread Stop\r\n"));
 
 	tcp->Release();
 

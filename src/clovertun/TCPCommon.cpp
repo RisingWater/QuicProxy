@@ -23,7 +23,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
         rc = WSARecv(s, &DataBuf, 1, &RecvBytes, &Flags, &RecvOverlapped, NULL);
         if ((rc == SOCKET_ERROR) && (WSA_IO_PENDING != (err = WSAGetLastError())))
         {
-            DBG_ERROR("WSARecv failed with error: %d\r\n", err);
+            DBG_ERROR(_T("WSARecv failed with error: %d\r\n"), err);
             bRet = FALSE;
             break;
         }
@@ -34,7 +34,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
             rc = WSAGetOverlappedResult(s, &RecvOverlapped, &RecvBytes, TRUE, &Flags);
             if (rc == FALSE)
             {
-                DBG_ERROR("WSARecv operation failed with error: %d\r\n", WSAGetLastError());
+                DBG_ERROR(_T("WSARecv operation failed with error: %d\r\n"), WSAGetLastError());
                 bRet = FALSE;
                 break;
             }
@@ -50,7 +50,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
         {
             if (dwRet == WAIT_OBJECT_0 + 1)
             {
-                DBG_TRACE("TCP get exit event \r\n");
+                DBG_TRACE(_T("TCP get exit event \r\n"));
             }
 
             WSASetEvent(RecvOverlapped.hEvent);
@@ -105,7 +105,7 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
 
         if ((rc == SOCKET_ERROR) &&
             (WSA_IO_PENDING != (err = WSAGetLastError()))) {
-            DBG_ERROR("WSASend failed with error: %d\r\n", err);
+            DBG_ERROR(_T("WSASend failed with error: %d\r\n"), err);
             break;
         }
 
@@ -123,7 +123,7 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
         {
             if (dwRet == WAIT_OBJECT_0 + 1)
             {
-                DBG_TRACE("get exit event \r\n");
+                DBG_TRACE(_T("get exit event \r\n"));
 
             }
             WSASetEvent(SendOverlapped.hEvent);
@@ -199,25 +199,25 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
 
     if (ret < 0)
     {
-        DBG_ERROR("tcp should not be here !!! \r\n");
+        DBG_ERROR(_T("tcp should not be here !!! \r\n"));
         return FALSE;
     }
     else if (ret == 0)
     {
-        DBG_ERROR("tcp recv poll timeout\r\n");
+        DBG_ERROR(_T("tcp recv poll timeout\r\n"));
         return FALSE;
     }
     else
     {
         if (n > 1 && fds[1].revents != 0)
         {
-            DBG_INFO("tcp recv get stop event \r\n");
+            DBG_INFO(_T("tcp recv get stop event \r\n"));
             return FALSE;
         }
 
         if ((fds[0].revents & ERR_MASK) != 0)
         {
-            DBG_INFO("tcp SocketRead other client close socket %d event %x \r\n", fds[0].fd, fds[0].revents);
+            DBG_INFO(_T("tcp SocketRead other client close socket %d event %x \r\n"), fds[0].fd, fds[0].revents);
             return FALSE;
         }
 
@@ -227,7 +227,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
             *pdwReaded = dwReaded;
             if (dwReaded == 0)
             {
-                DBG_INFO("tcp SocketRead recv 0 bytes\r\n");
+                DBG_INFO(_T("tcp SocketRead recv 0 bytes\r\n"));
                 return FALSE;
             }
             else if (dwReaded == -1)
@@ -238,7 +238,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
                     return TRUE;
                 }
 
-                DBG_INFO("tcp SocketRead failed errno %d\r\n", errno);
+                DBG_INFO(_T("tcp SocketRead failed errno %d\r\n"), errno);
                 *pdwReaded = 0;
                 return FALSE;
             }
@@ -248,7 +248,7 @@ BOOL TCPSocketRead(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwReaded
             }
         }
 
-        DBG_ERROR("tcp SocketRead not any event, should not be here\n");
+        DBG_ERROR(_T("tcp SocketRead not any event, should not be here\n"));
         return FALSE;
     }
 }
@@ -289,25 +289,25 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
 
     if (ret < 0)
     {
-        DBG_ERROR("tcp send poll error %d \r\n", errno);
+        DBG_ERROR(_T("tcp send poll error %d \r\n"), errno);
         return FALSE;
     }
     else if (ret == 0)
     {
-        DBG_ERROR("tcp send poll timeout\r\n");
+        DBG_ERROR(_T("tcp send poll timeout\r\n"));
         return FALSE;
     }
     else
     {
         if (n > 1 && fds[1].revents != 0)
         {
-            DBG_INFO("tcp send get stop event \r\n");
+            DBG_INFO(_T("tcp send get stop event \r\n"));
             return FALSE;
         }
 
         if ((fds[0].revents & ERR_MASK) != 0)
         {
-            DBG_INFO("tcp other client close socket %x\r\n", fds[0].revents);
+            DBG_INFO(_T("tcp other client close socket %x\r\n"), fds[0].revents);
             return FALSE;
         }
 
@@ -321,7 +321,7 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
 
                 if (dwWrite == 0)
                 {
-                    DBG_INFO("tcp SocketWrite recv 0 bytes\r\n");
+                    DBG_INFO(_T("tcp SocketWrite recv 0 bytes\r\n"));
                     return FALSE;
                 }
                 else if (dwWrite == -1)
@@ -332,7 +332,7 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
                         return TRUE;
                     }
 
-                    DBG_INFO("tcp SocketWrite failed errno %d\r\n", errno);
+                    DBG_INFO(_T("tcp SocketWrite failed errno %d\r\n"), errno);
                     return FALSE;
                 }
                 else
@@ -342,12 +342,12 @@ BOOL TCPSocketWrite(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* pdwWritt
             }
             catch (std::exception& e)
             {
-                DBG_INFO("tcp SocketWrite exception\r\n");
+                DBG_INFO(_T("tcp SocketWrite exception\r\n"));
                 return FALSE;
             }
         }
 
-        DBG_ERROR("tcp SocketWrite not any event, should not be here\n");
+        DBG_ERROR(_T("tcp SocketWrite not any event, should not be here\n"));
         return FALSE;
     }
 }

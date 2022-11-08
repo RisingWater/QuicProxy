@@ -69,11 +69,11 @@ BOOL CENetClient::Init()
 
     address.port = htons(address.port);
 
-    DBG_INFO("create host in port %d\r\n", ntohs(address.port));
+    DBG_INFO(_T("create host in port %d\r\n"), ntohs(address.port));
     m_pENetHost = enet_host_create(&address, 255, 0, 0, 0);
     if (m_pENetHost == NULL)
     {
-        DBG_ERROR("An error occurred while trying to create an ENet server host.\r\n");
+        DBG_ERROR(_T("An error occurred while trying to create an ENet server host.\r\n"));
         return FALSE;
     }
 
@@ -85,14 +85,18 @@ BOOL CENetClient::Init()
         enet_address_set_host_ip(&hostAddress, inet_ntoa(m_stPeerInfo.ipaddr));
         hostAddress.port = htons(m_stPeerInfo.port);
 
-        DBG_INFO("connect to udp socket %s:%d\r\n", inet_ntoa(m_stPeerInfo.ipaddr), ntohs(hostAddress.port));
+#ifdef UNICODE
+        DBG_INFO(_T("connect to udp socket %S:%d\r\n"), inet_ntoa(m_stPeerInfo.ipaddr), ntohs(hostAddress.port));
+#else
+        DBG_INFO(_T("connect to udp socket %s:%d\r\n"), inet_ntoa(m_stPeerInfo.ipaddr), ntohs(hostAddress.port));
+#endif
 
         for (int i = 0; i < 10; i++)
         {
             m_pENetPeer = enet_host_connect(m_pENetHost, &hostAddress, 16, 0);
             if (m_pENetPeer == NULL)
             {
-                DBG_ERROR("No available peers for initiating an ENet connection.\r\n");
+                DBG_ERROR(_T("No available peers for initiating an ENet connection.\r\n"));
                 return FALSE;
             }
 
@@ -101,14 +105,14 @@ BOOL CENetClient::Init()
             if (ret > 0 &&
                 event.type == ENET_EVENT_TYPE_CONNECT)
             {
-                DBG_INFO("Connection to Host succeeded.\r\n");
+                DBG_INFO(_T("Connection to Host succeeded.\r\n"));
                 break;
             }
             else
             {
                 enet_peer_reset(m_pENetPeer);
                 m_pENetPeer = NULL;
-                DBG_ERROR("Connection to Host failed.\r\n");
+                DBG_ERROR(_T("Connection to Host failed.\r\n"));
             }
         }
     }
@@ -174,7 +178,7 @@ DWORD WINAPI CENetClient::MainProc(void* pParam)
 		}
 	}
     
-    DBG_INFO("CENetClient: Main Thread Stop\r\n");
+    DBG_INFO(_T("CENetClient: Main Thread Stop\r\n"));
 
 	tcp->Release();
 
@@ -200,7 +204,11 @@ BOOL CENetClient::ENetProcess(HANDLE StopEvent)
             case ENET_EVENT_TYPE_CONNECT:
             {
                 char tmp[64] = { 0 };
-                DBG_INFO("guest connected host %s:%d\r\n", inet_ntop(AF_INET, &event.peer->address.host, tmp, 64), ntohs(event.peer->address.port));
+#ifdef UNICODE
+                DBG_INFO(_T("guest connected host %S:%d\r\n"), inet_ntop(AF_INET, &event.peer->address.host, tmp, 64), ntohs(event.peer->address.port));
+#else
+                DBG_INFO(_T("guest connected host %s:%d\r\n"), inet_ntop(AF_INET, &event.peer->address.host, tmp, 64), ntohs(event.peer->address.port));
+#endif
 
                 event.peer->data = (void*)m_dwPeerId;
                 m_pENetPeer = event.peer;
@@ -227,21 +235,21 @@ BOOL CENetClient::ENetProcess(HANDLE StopEvent)
                 if (event.peer->data != NULL)
                 {
                     m_pENetPeer = NULL;
-                    DBG_INFO("disconnected.\n");
+                    DBG_INFO(_T("disconnected.\n"));
                     return FALSE;
                 }
                 break;
             }
             default:
             {
-                DBG_ERROR("unknow event %d\r\n", event.type);
+                DBG_ERROR(_T("unknow event %d\r\n"), event.type);
                 break;
             }
         }
     }
     else if (ret < 0)
     {
-        DBG_ERROR("enet_host_service failed %d\r\n", ret);
+        DBG_ERROR(_T("enet_host_service failed %d\r\n"), ret);
         return FALSE;
     }
         

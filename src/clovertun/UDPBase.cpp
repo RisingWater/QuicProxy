@@ -89,7 +89,7 @@ DWORD WINAPI CUDPBase::RecvProc(void* pParam)
         }
     }
 
-    DBG_INFO("UDPBase: Recv Thread Stop\r\n");
+    DBG_INFO(_T("UDPBase: Recv Thread Stop\r\n"));
 
     udp->Release();
 
@@ -107,7 +107,7 @@ DWORD WINAPI CUDPBase::SendProc(void* pParam)
         }
     }
 
-    DBG_INFO("UDPBase: Send Thread Stop\r\n");
+    DBG_INFO(_T("UDPBase: Send Thread Stop\r\n"));
 
     udp->Release();
 
@@ -226,25 +226,25 @@ BOOL CUDPBase::RecvProcess(HANDLE StopEvent)
 
     if (!Ret)
     {
-        DBG_ERROR("recv failed last error %d\r\n", GetLastError());
+        DBG_ERROR(_T("recv failed last error %d\r\n"), GetLastError());
         return FALSE;
     }
 
     if (Length == 0)
     {
-        DBG_ERROR("recv length == 0 last error %d\r\n", GetLastError());
+        DBG_ERROR(_T("recv length == 0 last error %d\r\n"), GetLastError());
         return FALSE;
     }
 
     if (Length != sizeof(UDPBASE_PACKET))
     {
-        DBG_ERROR("length error, skip this packet\r\n");
+        DBG_ERROR(_T("length error, skip this packet\r\n"));
         return TRUE;
     }
 
     if (!IsCheckSumVaild(Packet.BasePacket))
     {
-        DBG_ERROR("check sum error, skip this packet\r\n");
+        DBG_ERROR(_T("check sum error, skip this packet\r\n"));
         return TRUE;
     }
 

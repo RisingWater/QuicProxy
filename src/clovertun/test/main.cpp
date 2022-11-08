@@ -17,15 +17,15 @@ typedef enum
     ROLE_TYPE_MAX
 } ROLE_TYPE;
 
-const char* roleTypeName[] = {
-    "tcpserver",
-    "tcpclient",
-    "udpserver",
-    "udpclient",
-    "enetserver",
-    "enetclient",
-    "quicserver",
-    "quicclient"
+const TCHAR* roleTypeName[] = {
+    _T("tcpserver"),
+    _T("tcpclient"),
+    _T("udpserver"),
+    _T("udpclient"),
+    _T("enetserver"),
+    _T("enetclient"),
+    _T("quicserver"),
+    _T("quicclient")
 };
 
 extern void TCPServerTest(int port);
@@ -53,7 +53,7 @@ DWORD WINAPI TimerProc(void* pParam)
     {
         EnterCriticalSection(&g_RecvByetLock);
 
-        DBG_INFO("Transfor Speed %d KBps\r\n", g_RecvBytes / 1024);
+        DBG_INFO(_T("Transfor Speed %d KBps\r\n"), g_RecvBytes / 1024);
 
         g_RecvBytes = 0;
 
@@ -69,7 +69,7 @@ DWORD WINAPI TimerProc(void* pParam)
     return 0;
 }
 
-int main(int argc,char * argv[])
+int main(int argc, TCHAR* argv[])
 {
 	int c;
 
@@ -91,12 +91,13 @@ int main(int argc,char * argv[])
     {
         switch (c)
         {
-            case _T('t'):
-    			DBG_INFO("name: %s\n", optarg);
+            case 't':
+            {
+                DBG_INFO(_T("name: %s\n"), optarg);
 
                 for (int i = 0; i < ROLE_TYPE_MAX; i++)
                 {
-                    if (strcmp(roleTypeName[i], optarg) == 0)
+                    if (_tcscmp(roleTypeName[i], optarg) == 0)
                     {
                         roleType = (ROLE_TYPE)i;
                         break;
@@ -105,7 +106,7 @@ int main(int argc,char * argv[])
 
                 if (roleType == ROLE_TYPE_MAX)
                 {
-                    DBG_ERROR("ERROR: unknow role %s\n", optarg);
+                    DBG_ERROR(_T("ERROR: unknow role %s\n"), optarg);
                     return -1;
                 }
 
@@ -114,36 +115,50 @@ int main(int argc,char * argv[])
                     isServer = TRUE;
                 }
 
-	            break;
-
-            case _T('p'):
-				DBG_INFO("port: %d\n", atoi(optarg));
-                port = atoi(optarg);
                 break;
-
-            case _T('a'):
-				if (!isServer)
-				{
-					DBG_INFO("addr: %s\n", optarg);
+            }
+            case 'p':
+            {
+                TCHAR* end = NULL;
+#ifdef UNICODE
+                int tmpPort = _ttoi(optarg);
+#else
+                int tmpPort = atoi(optarg);
+#endif
+                DBG_INFO(_T("port: %d\n"), tmpPort);
+                port = tmpPort;
+                break;
+            }
+            case 'a':
+            {
+                if (!isServer)
+                {
+                    DBG_INFO(_T("addr: %s\n"), optarg);
+#ifdef UNICODE
+                    sprintf(ipAddr, "%S", optarg);
+#else
                     strcpy(ipAddr, optarg);
-				}
+#endif
+                }
                 break;
-
+            }
             default:
-                DBG_ERROR("WARNING: no handler for option %c\n", c);
+            {
+                DBG_ERROR(_T("WARNING: no handler for option %c\n"), c);
                 return -1;
+            }
         }
     }
 
     if (port == 0)
     {
-        DBG_ERROR("ERROR: unknow port\n");
+        DBG_ERROR(_T("ERROR: unknow port\n"));
         return -1;
     }
 
     if (!isServer && strlen(ipAddr) == 0)
     {
-        DBG_ERROR("ERROR: unknow addr\n");
+        DBG_ERROR(_T("ERROR: unknow addr\n"));
         return -1;
     }
 
@@ -181,7 +196,7 @@ int main(int argc,char * argv[])
             QUICClientTest(ipAddr, port);
             break;
         default:
-            DBG_ERROR("ERROR: unknow type\n");
+            DBG_ERROR(_T("ERROR: unknow type\n"));
             break;
     }
 #ifdef ENET_SUPPORT

@@ -23,7 +23,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
         rc = WSARecvFrom(s, &DataBuf, 1, &RecvBytes, &Flags, addr, (LPINT)addrLen, &RecvOverlapped, NULL);
         if ((rc == SOCKET_ERROR) && (WSA_IO_PENDING != (err = WSAGetLastError())))
         {
-            DBG_ERROR("WSARecv failed with error: %d\r\n", err);
+            DBG_ERROR(_T("WSARecv failed with error: %d\r\n"), err);
             bRet = FALSE;
             break;
         }
@@ -34,7 +34,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
             rc = WSAGetOverlappedResult(s, &RecvOverlapped, &RecvBytes, TRUE, &Flags);
             if (rc == FALSE)
             {
-                DBG_ERROR("WSARecv operation failed with error: %d\r\n", WSAGetLastError());
+                DBG_ERROR(_T("WSARecv operation failed with error: %d\r\n"), WSAGetLastError());
                 bRet = FALSE;
                 break;
             }
@@ -50,7 +50,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
         {
             if (dwRet == WAIT_OBJECT_0 + 1)
             {
-                DBG_TRACE("UDP get exit event \r\n");
+                DBG_TRACE(_T("UDP get exit event \r\n"));
             }
 
             WSASetEvent(RecvOverlapped.hEvent);
@@ -104,7 +104,7 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
 
         if ((rc == SOCKET_ERROR) &&
             (WSA_IO_PENDING != (err = WSAGetLastError()))) {
-            DBG_ERROR("WSASend failed with error: %d\r\n", err);
+            DBG_ERROR(_T("WSASend failed with error: %d\r\n"), err);
             break;
         }
 
@@ -122,7 +122,7 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
         {
             if (dwRet == WAIT_OBJECT_0 + 1)
             {
-                DBG_TRACE("get exit event \r\n");
+                DBG_TRACE(_T("get exit event \r\n"));
 
             }
             WSASetEvent(SendOverlapped.hEvent);
@@ -196,25 +196,25 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
 
     if (ret < 0)
     {
-        DBG_ERROR("should not be here !!! \r\n");
+        DBG_ERROR(_T("should not be here !!! \r\n"));
         return FALSE;
     }
     else if (ret == 0)
     {
-        DBG_ERROR("recv poll timeout\r\n");
+        DBG_ERROR(_T("recv poll timeout\r\n"));
         return FALSE;
     }
     else
     {
         if (n > 1 && fds[1].revents != 0)
         {
-            DBG_INFO("recv get stop event \r\n");
+            DBG_INFO(_T("recv get stop event \r\n"));
             return FALSE;
         }
 
         if ((fds[0].revents & ERR_MASK) != 0)
         {
-            DBG_INFO("udp SocketRead other client close socket %d event %x \r\n", fds[0].fd, fds[0].revents);
+            DBG_INFO(_T("udp SocketRead other client close socket %d event %x \r\n"), fds[0].fd, fds[0].revents);
             return FALSE;
         }
 
@@ -224,7 +224,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
 
             if (dwReaded == 0)
             {
-                DBG_INFO("udp SocketRead recv 0 bytes\r\n");
+                DBG_INFO(_T("udp SocketRead recv 0 bytes\r\n"));
                 return FALSE;
             } 
             else if (dwReaded == -1)
@@ -234,7 +234,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
                     return TRUE;
                 }
 
-                DBG_INFO("udp SocketRead failed errno %d\r\n", errno);
+                DBG_INFO(_T("udp SocketRead failed errno %d\r\n"), errno);
                 return FALSE;
             }
             else
@@ -244,7 +244,7 @@ BOOL UDPSocketRecvFrom(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, DWORD* RecvL
             }
         }
 
-        DBG_ERROR("udp SocketRead not any event, should not be here\n");
+        DBG_ERROR(_T("udp SocketRead not any event, should not be here\n"));
         return FALSE;
     }
 }
@@ -284,25 +284,25 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
 
     if (ret < 0)
     {
-        DBG_ERROR("udp send poll error %d \r\n", errno);
+        DBG_ERROR(_T("udp send poll error %d \r\n"), errno);
         return FALSE;
     }
     else if (ret == 0)
     {
-        DBG_ERROR("udp send poll timeout\r\n");
+        DBG_ERROR(_T("udp send poll timeout\r\n"));
         return FALSE;
     }
     else
     {
         if (n > 1 && fds[1].revents != 0)
         {
-            DBG_INFO("udp send get stop event \r\n");
+            DBG_INFO(_T("udp send get stop event \r\n"));
             return FALSE;
         }
 
         if ((fds[0].revents & ERR_MASK) != 0)
         {
-            DBG_INFO("udp other client close socket %x\r\n", fds[0].revents);
+            DBG_INFO(_T("udp other client close socket %x\r\n"), fds[0].revents);
             return FALSE;
         }
 
@@ -315,7 +315,7 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
 
                 if (dwWrite == 0)
                 {
-                    DBG_INFO("udp SocketWrite recv 0 bytes\r\n");
+                    DBG_INFO(_T("udp SocketWrite recv 0 bytes\r\n"));
                     return FALSE;
                 }
                 else if (dwWrite == -1)
@@ -325,7 +325,7 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
                         return TRUE;
                     }
 
-                    DBG_INFO("udp SocketWrite failed errno %d\r\n", errno);
+                    DBG_INFO(_T("udp SocketWrite failed errno %d\r\n"), errno);
                     return FALSE;
                 }
                 else
@@ -335,12 +335,12 @@ BOOL UDPSocketSendTo(SOCKET s, BYTE* pBuffer, DWORD dwBufferSize, struct sockadd
             }
             catch (std::exception& e)
             {
-                DBG_INFO("udp SocketWrite exception\r\n");
+                DBG_INFO(_T("udp SocketWrite exception\r\n"));
                 return FALSE;
             }
         }
 
-        DBG_ERROR("udp SocketWrite not any event, should not be here\n");
+        DBG_ERROR(_T("udp SocketWrite not any event, should not be here\n"));
         return FALSE;
     }
 }
