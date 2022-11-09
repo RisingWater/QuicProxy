@@ -6,6 +6,9 @@
     <ClCompile Include="QUICBase.cpp" />
     <ClCompile Include="QUICClient.cpp" />
     <ClCompile Include="QUICServer.cpp" />
+    <ClCompile Include="ProxyService.cpp" />
+    <ClCompile Include="ProxyProcessor.cpp" />
+    <ClCompile Include="ClientSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -13,5 +16,8 @@
     <ClInclude Include="QUICBase.h" />
     <ClInclude Include="QUICClient.h" />
     <ClInclude Include="QUICServer.h" />
+    <ClInclude Include="ProxyService.h" />
+    <ClInclude Include="ProxyProcessor.h" />
+    <ClInclude Include="ClientSession.h" />
   </ItemGroup>
 </Project>

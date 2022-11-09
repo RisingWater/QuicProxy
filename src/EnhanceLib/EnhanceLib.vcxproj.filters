@@ -2,9 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="Opini.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="IThread.cpp" />
+    <ClCompile Include="Opini.cpp" />
+    <ClCompile Include="IOpini.cpp" />
   </ItemGroup>
 </Project>

@@ -63,21 +63,37 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdparty/msquic/lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>msquic.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ProxyProcessor.cpp" />
+    <ClCompile Include="ProxyService.cpp" />
+    <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="QUICBase.cpp" />
     <ClCompile Include="QUICClient.cpp" />
     <ClCompile Include="QUICServer.cpp" />
     <ClCompile Include="SocketProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ProxyProcessor.h" />
+    <ClInclude Include="ProxyService.h" />
+    <ClInclude Include="ClientSession.h" />
     <ClInclude Include="QUICBase.h" />
     <ClInclude Include="QUICClient.h" />
     <ClInclude Include="QUICServer.h" />
     <ClInclude Include="SocketProxy.h" />
     <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\corelib\corelib.vcxproj">
+      <Project>{6162410e-47fd-4b76-9d7d-37be6a41293a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\EnhanceLib\EnhanceLib.vcxproj">
+      <Project>{4c30fb2e-7e5d-4e4f-ab23-e0f0ce6911d3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

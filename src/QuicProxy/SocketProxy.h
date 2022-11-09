@@ -71,6 +71,7 @@ private:
     CQUICServer* m_pQuicChannel;
 
 	CRITICAL_SECTION m_csLock;
+    CRITICAL_SECTION m_csQuicLock;
 };
 
 #endif

@@ -1,4 +1,14 @@
 ﻿#include "stdafx.h"
+#include "QUICServer.h"
+#include "QUICClient.h"
+#include "SocketProxy.h"
+#include "ProxyProcessor.h"
+#include "IOpini.h"
+
+#define CERT_PATH "ca.crt"
+#define KEY_PATH  "ca.key"
+
+HANDLE g_StopEvent;
 
 typedef enum
 {
@@ -7,16 +17,16 @@ typedef enum
     ROLE_TYPE_MAX
 } PROXY_ROLE_TYPE;
 
-const TCHAR* roleTypeName[] = {
-    _T("proxyerver"),
-    _T("proxyclient"),
-    _T("proxymax")
+const CHAR* roleTypeName[] = {
+    "proxyerver",
+    "proxyclient",
+    "proxymax"
 };
 
-static BOOL GetFullPathRelative(const TCHAR *filename, TCHAR* filePath, DWORD filePathSize)
+static BOOL GetFullPathRelative(const CHAR *filename, CHAR* filePath, DWORD filePathSize)
 {
-    TCHAR tmp[MAX_PATH] = { 0 };
-    TCHAR *p;
+    CHAR tmp[MAX_PATH] = { 0 };
+    CHAR *p;
 
     if (filename == NULL || filePath == NULL)
     {
@@ -24,24 +34,24 @@ static BOOL GetFullPathRelative(const TCHAR *filename, TCHAR* filePath, DWORD fi
     }
 
     memset(tmp, 0, filePathSize);
-    GetModuleFileName(NULL, tmp, MAX_PATH);
+    GetModuleFileNameA(NULL, tmp, MAX_PATH);
 
-    p = _tcsrchr(tmp, _T('\\'));
+    p = strchr(tmp, _T('\\'));
     if (p != NULL)
     {
         *(p + 1) = NULL;
 
-        int cch = _tcslen(tmp) + _tcslen(filename) + 1;
-        DWORD size = cch * sizeof(TCHAR);
+        int cch = strlen(tmp) + strlen(filename) + 1;
+        DWORD size = cch * sizeof(CHAR);
 
         if (size > filePathSize || cch > MAX_PATH)
         {
             return FALSE;
         }
 
-        _tcscat(tmp, filename);
+        strcat(tmp, filename);
 
-        DWORD ret = GetFullPathName(tmp, MAX_PATH, filePath, NULL);
+        DWORD ret = GetFullPathNameA(tmp, MAX_PATH, filePath, NULL);
         if (ret > 0 && ret <= MAX_PATH)
         {
             return TRUE;
@@ -51,16 +61,18 @@ static BOOL GetFullPathRelative(const TCHAR *filename, TCHAR* filePath, DWORD fi
     return FALSE;
 }
 
-PROXY_ROLE_TYPE GetRoleType(TCHAR* szConfigPath)
+PROXY_ROLE_TYPE GetRoleType(CHAR* szConfigPath)
 {
-    TCHAR szRole[MAX_PATH] = { 0 };
+    CHAR szRole[MAX_PATH] = { 0 };
     PROXY_ROLE_TYPE roleType = ROLE_TYPE_MAX;
 
-    if (GetPrivateProfileString(_T("config"), _T("role"), _T(""), szRole, MAX_PATH, szConfigPath))
+    IFileIni* Ini = CreateIFileIniInstance(szConfigPath);
+
+    if (Ini->ReadOption("config", "role", szRole))
     {
         for (int i = 0; i < ROLE_TYPE_MAX; i++)
         {
-            if (_tcscmp(roleTypeName[i], szRole) == 0)
+            if (strcmp(roleTypeName[i], szRole) == 0)
             {
                 roleType = (PROXY_ROLE_TYPE)i;
                 break;
@@ -68,14 +80,18 @@ PROXY_ROLE_TYPE GetRoleType(TCHAR* szConfigPath)
         }
     }
 
+    Ini->Release();
+
     return roleType;
 }
 
-BOOL GetAddressAndPort(TCHAR* szConfigPath, TCHAR* pAddress, DWORD dwAddressSize, int* pdwPort)
+BOOL GetAddressAndPort(CHAR* szConfigPath, CHAR* pAddress, DWORD dwAddressSize, int* pdwPort)
 {
-    TCHAR szProxyConfig[MAX_PATH] = { 0 };
+    CHAR szProxyConfig[MAX_PATH] = { 0 };
 
-    if (GetPrivateProfileString("config", "proxy_server", "", szProxyConfig, MAX_PATH, szConfigPath))
+    IFileIni* Ini = CreateIFileIniInstance(szConfigPath);
+
+    if (Ini->ReadOption("config", "proxy_server", szProxyConfig))
     {
         CHAR *p;
         p = strchr(szProxyConfig, _T(':'));
@@ -87,11 +103,13 @@ BOOL GetAddressAndPort(TCHAR* szConfigPath, TCHAR* pAddress, DWORD dwAddressSize
 
         if (pAddress)
         {
-            _tcsncpy(pAddress, szProxyConfig, dwAddressSize);
+            strncpy(pAddress, szProxyConfig, dwAddressSize);
         }
 
         return TRUE;
     }
+
+    Ini->Release();
 
     return FALSE;
 }
@@ -101,43 +119,103 @@ BOOL IsServer(PROXY_ROLE_TYPE roleType)
     return roleType == PROXY_SERVER;
 }
 
+static void QUICClientConnectedProcess(CQUICServer* s, CBaseObject* pParam)
+{
+    if (s)
+    {
+        CSocketProxy* proxy = new CSocketProxy(s);
+        proxy->Init();
+    }
+
+    return;
+}
+
+void ProxyServer(int port)
+{
+    CQUICService* QUICService = NULL;
+
+    CHAR CertPath[MAX_PATH] = { 0 };
+    CHAR KeyPath[MAX_PATH] = { 0 };
+
+    if (!GetFullPathRelative(CERT_PATH, CertPath, MAX_PATH))
+    {
+        DBG_ERROR(_T("get CertPath failed\r\n"));
+        return;
+    }
+
+    if (!GetFullPathRelative(KEY_PATH, KeyPath, MAX_PATH))
+    {
+        DBG_ERROR(_T("get CertPath failed\r\n"));
+        return;
+    }
+
+    QUICService = new CQUICService(port, "xredtest", CertPath, KeyPath);
+    if (QUICService)
+    {
+        QUICService->RegisterConnectedProcess(QUICClientConnectedProcess, NULL);
+        if (QUICService->Init())
+        {
+            WaitForSingleObject(g_StopEvent, INFINITE);
+
+            QUICService->RegisterConnectedProcess(NULL, NULL);
+            QUICService->Done();
+        }
+        QUICService->Release();
+    }
+}
+
+void ProxyClient(CHAR* ConfigPath, CHAR* address, int port)
+{
+    CProxyProcessor* Processor = new CProxyProcessor(g_StopEvent, address, port);
+    if (Processor->Init(ConfigPath))
+    {
+        Processor->Run();
+        Processor->Done();
+    }
+
+    Processor->Release();
+}
+
 int main(int argc,char * argv[])
 {
-    TCHAR szConfigPath[MAX_PATH] = { 0 };
+    g_StopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    CHAR szConfigPath[MAX_PATH] = { 0 };
     if (!GetFullPathRelative("QuicProxyConf.ini", szConfigPath, MAX_PATH))
     {
-        DBG_ERROR("get config path failed\r\n");
+        DBG_ERROR(_T("get config path failed\r\n"));
         return -1;
     }
 
     PROXY_ROLE_TYPE roleType = GetRoleType(szConfigPath);
 
-    char ipAddr[64] = { 0 };
+    CHAR ipAddr[64] = { 0 };
     int port = 0;
 
     if (GetAddressAndPort(szConfigPath, ipAddr, 64, &port))
     {
-        DBG_ERROR("get config address and port failed\r\n");
+        DBG_ERROR(_T("get config address and port failed\r\n"));
         return -1;
     }
 
     if (port == 0)
     {
-        DBG_ERROR("ERROR: unknow port\n");
+        DBG_ERROR(_T("ERROR: unknow port\n"));
         return -1;
     }
     
     if (IsServer(roleType))
     {
-        
+        ProxyServer(port);
     }
     else
     {
         if (strlen(ipAddr) == 0)
         {
-            DBG_ERROR("ERROR: unknow addr\n");
+            DBG_ERROR(_T("ERROR: unknow addr\n"));
             return -1;
         }
+
+        ProxyClient(szConfigPath, ipAddr, port);
     }
 }
 

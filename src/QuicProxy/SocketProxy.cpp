@@ -79,7 +79,6 @@ void CProxySession::GetGuid(GUID* guid)
 BOOL CProxySession::Init()
 {
 	struct sockaddr_in  DstAddress;
-	struct sockaddr_in  SrcAddress;
 
 	int Ret;
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -91,7 +90,7 @@ BOOL CProxySession::Init()
 
 	memset(&DstAddress, 0, sizeof(sockaddr_in));
 	DstAddress.sin_family = AF_INET;
-	DstAddress.sin_port = htons(m_dwPort);
+	DstAddress.sin_port = htons((WORD)m_dwPort);
 	DstAddress.sin_addr.s_addr = inet_addr(m_szIPAddress);
 
 	Ret = connect(sock, (struct sockaddr *)&DstAddress, sizeof(sockaddr_in));
@@ -193,27 +192,69 @@ void CProxySession::RecvProcess(char* buffer, DWORD len)
 
 CSocketProxy::CSocketProxy(CQUICServer* quicChannel)
 {
+    InitializeCriticalSection(&m_csLock);
+    InitializeCriticalSection(&m_csQuicLock);
+
+    EnterCriticalSection(&m_csQuicLock);
     m_pQuicChannel = quicChannel;
-	InitializeCriticalSection(&m_csLock);
+    if (m_pQuicChannel)
+    {
+        m_pQuicChannel->AddRef();
+    }
+
+    LeaveCriticalSection(&m_csQuicLock);
 }
 
 CSocketProxy::~CSocketProxy()
 {
 	DeleteCriticalSection(&m_csLock);
+    DeleteCriticalSection(&m_csQuicLock);
 }
 
 BOOL CSocketProxy::Init()
 {
-    m_pQuicChannel->RegisterRecvProcess(CSocketProxy::QUICServerRecvPacketProcess, this);
-    m_pQuicChannel->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
+    EnterCriticalSection(&m_csQuicLock);
+
+    if (m_pQuicChannel)
+    {
+        m_pQuicChannel->RegisterRecvProcess(CSocketProxy::QUICServerRecvPacketProcess, this);
+        m_pQuicChannel->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
+    }
+
+    LeaveCriticalSection(&m_csQuicLock);
+
 	return TRUE;
 }
 
 void CSocketProxy::Done()
 {
+    std::list<CProxySession*>::iterator Itor;
+    CProxySession* session = NULL;
+    
+    EnterCriticalSection(&m_csLock);
+
+    for (Itor = m_SessionList.begin(); Itor != m_SessionList.end(); Itor++)
+    {
+        session = (*Itor);
+        session->Done();
+        session->Release();
+    }
+
+    m_SessionList.clear();
+
+    LeaveCriticalSection(&m_csLock);
+
+    EnterCriticalSection(&m_csQuicLock);
+
     m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
     m_pQuicChannel->RegisterEndProcess(NULL, NULL);
     m_pQuicChannel->CloseConnection();
+    m_pQuicChannel->Release();
+    m_pQuicChannel = NULL;
+
+    LeaveCriticalSection(&m_csQuicLock);
+
+    Release();
 }
 
 CProxySession* CSocketProxy::FindSessionByGUID(GUID guid)
@@ -278,6 +319,18 @@ BOOL CSocketProxy::QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCo
 	{
         proxy->SocketRecvCallback(Data, Length);
 	}
+
+    return TRUE;
+}
+
+VOID CSocketProxy::QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject* Param)
+{
+    CSocketProxy* proxy = dynamic_cast<CSocketProxy*>(Param);
+
+    if (proxy)
+    {
+        proxy->Done();
+    }
 }
 
 void CSocketProxy::SocketRecvCallback(PBYTE buffer, DWORD len)
@@ -353,7 +406,14 @@ void CSocketProxy::SendDataToProxy(GUID guid, char* buffer, DWORD len)
 	header->dwLength = len;
 	memcpy(header->Data, buffer, len);
 
-	m_pQuicChannel->SendPacket(pkt, pktLen, NULL);
+    EnterCriticalSection(&m_csQuicLock);
+
+    if (m_pQuicChannel)
+    {
+        m_pQuicChannel->SendPacket(pkt, pktLen, NULL);
+    }
+
+    LeaveCriticalSection(&m_csQuicLock);
 
 	free(pkt);
 }
@@ -367,5 +427,12 @@ void CSocketProxy::SendDisconnectToProxy(GUID guid)
 	Disconnet.Header.dwType = PROXY_TYPE_DISCONNECT;
 	memcpy(&Disconnet.Header.stGuid, &guid, sizeof(GUID));
 
-    m_pQuicChannel->SendPacket((PBYTE)&Disconnet, sizeof(PROXY_DISCONNECT), NULL);
+    EnterCriticalSection(&m_csQuicLock);
+
+    if (m_pQuicChannel)
+    {
+        m_pQuicChannel->SendPacket((PBYTE)&Disconnet, sizeof(PROXY_DISCONNECT), NULL);
+    }
+
+    LeaveCriticalSection(&m_csQuicLock);
 }
