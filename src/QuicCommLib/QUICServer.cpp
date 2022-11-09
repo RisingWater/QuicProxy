@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "QUICServer.h"
 
-CQUICService::CQUICService(WORD Port, const CHAR* Keyword, CHAR* CertFilePath, CHAR* KeyFilePath) 
+CQUICService::CQUICService(WORD Port, const CHAR* Keyword, const CHAR* CertFilePath, const CHAR* KeyFilePath) 
     : IQUICBase()
 {
     m_wUdpPort = Port;
@@ -31,8 +31,11 @@ void CQUICService::LoadConfiguration()
 {
     QUIC_SETTINGS Settings = { 0 };
 
-    Settings.IdleTimeoutMs = 1000ULL;
+    Settings.IdleTimeoutMs = 0;
     Settings.IsSet.IdleTimeoutMs = TRUE;
+
+    Settings.KeepAliveIntervalMs = 2000;
+    Settings.IsSet.KeepAliveIntervalMs = TRUE;
     
     Settings.ServerResumptionLevel = QUIC_SERVER_RESUME_AND_ZERORTT;
     Settings.IsSet.ServerResumptionLevel = TRUE;
@@ -94,6 +97,8 @@ BOOL CQUICService::Init()
         DBG_ERROR(_T("ListenerStart failed, 0x%x!\n"), Status);
         goto Error;
     }
+
+    DBG_ERROR(_T("QUIC Listener Started\n"));
 
     return TRUE;
 
@@ -329,12 +334,10 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
     {
         case QUIC_STREAM_EVENT_SEND_COMPLETE:
         {
-            QUICSendNode* Node = (QUICSendNode*)(Event->SEND_COMPLETE.ClientContext);
-            if (Node->SyncHandle)
+            if (pServer)
             {
-                SetEvent(Node->SyncHandle);
+                pServer->ProcessSendCompleteEvent(Event);
             }
-            free(Node);
 
             break;
         }
@@ -342,12 +345,7 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
         {
             if (pServer)
             {
-                EnterCriticalSection(&pServer->m_csLock);
-                if (pServer->m_pfnRecvFunc)
-                {
-                    pServer->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, (DWORD)Event->RECEIVE.TotalBufferLength, pServer, pServer->m_pRecvParam);
-                }
-                LeaveCriticalSection(&pServer->m_csLock);
+                pServer->ProcessRecvEvent(Event);
             }
 
             break;
@@ -376,6 +374,7 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
 
             if (pServer)
             {
+                pServer->ProcessShutdownEvent(Event);
                 pServer->m_pService->ServerDisconnect(Stream);
                 pServer->m_pService->m_pMsQuic->StreamClose(Stream);
                 pServer->Release();
@@ -394,13 +393,7 @@ QUIC_STATUS QUIC_API CQUICServer::ServerStreamCallback(
 
 BOOL CQUICServer::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
 {
-    QUICSendNode* Node = (QUICSendNode*)malloc(sizeof(QUICSendNode) + Length);
-
-    Node->Packet.Buffer = (uint8_t*)Node + sizeof(QUICSendNode);
-    Node->Packet.Length = Length;
-    Node->SyncHandle = SyncHandle;
-
-    memcpy(Node->Packet.Buffer, Data, Length);
+    QUICSendNode* Node = CreateQUICSendNode(Data, Length, SyncHandle);
 
     QUIC_STATUS Status = m_pService->m_pMsQuic->StreamSend(m_hStream, &Node->Packet, 1, QUIC_SEND_FLAG_NONE, Node);
 

@@ -13,6 +13,7 @@
 #include <ws2tcpip.h>
 #include <tchar.h>
 #pragma warning(disable:4127)
+#pragma warning(disable:4200)
 #pragma warning(disable:4996)
 #else
 #include <errno.h>
@@ -22,11 +23,18 @@
 #include "winpr/synch.h"
 #include "winpr/thread.h"
 #include "winpr/interlocked.h"
+#include "winpr/winsock.h"
 #endif
 
 #define DBG_ERROR _tprintf
 #define DBG_WARN  _tprintf
 #define DBG_INFO  _tprintf
 #define DBG_TRACE _tprintf
+
+#define GUID_FORMAT _T("[%08x-%04x-%04x-%02x%02x%02x%02x%02x%02x%02x%02x] ")
+#define GUID_STRING(guid) \
+    (guid).Data1,(guid).Data2,(guid).Data3,\
+    (guid).Data4[0],(guid).Data4[1],(guid).Data4[2],(guid).Data4[3],\
+    (guid).Data4[4],(guid).Data4[5],(guid).Data4[6],(guid).Data4[7]
 
 #endif

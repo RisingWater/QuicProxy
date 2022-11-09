@@ -77,9 +77,12 @@ VOID CQUICClient::Done()
 VOID CQUICClient::LoadConfiguration()
 {
     QUIC_SETTINGS Settings = { 0 };
-    
-    Settings.IdleTimeoutMs = 1000;
+   
+    Settings.IdleTimeoutMs = 0;
     Settings.IsSet.IdleTimeoutMs = TRUE;
+
+    Settings.KeepAliveIntervalMs = 2000;
+    Settings.IsSet.KeepAliveIntervalMs = TRUE;
 
     QUIC_CREDENTIAL_CONFIG CredConfig;
     memset(&CredConfig, 0, sizeof(CredConfig));
@@ -149,12 +152,10 @@ QUIC_STATUS CQUICClient::ClientStreamCallback(
     {
         case QUIC_STREAM_EVENT_SEND_COMPLETE:
         {
-            QUICSendNode* Node = (QUICSendNode*)(Event->SEND_COMPLETE.ClientContext);
-            if (Node->SyncHandle)
+            if (pClient)
             {
-                SetEvent(Node->SyncHandle);
+                pClient->ProcessSendCompleteEvent(Event);
             }
-            free(Node);
             
             break;
         }
@@ -162,14 +163,8 @@ QUIC_STATUS CQUICClient::ClientStreamCallback(
         {
             if (pClient)
             {
-                EnterCriticalSection(&pClient->m_csLock);
-                if (pClient->m_pfnRecvFunc)
-                {
-                    pClient->m_pfnRecvFunc((PBYTE)Event->RECEIVE.Buffers, (DWORD)Event->RECEIVE.TotalBufferLength, pClient, pClient->m_pRecvParam);
-                }
-                LeaveCriticalSection(&pClient->m_csLock);
+                pClient->ProcessRecvEvent(Event);
             }
-            
             break;
         }
         case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
@@ -188,15 +183,7 @@ QUIC_STATUS CQUICClient::ClientStreamCallback(
             if (!Event->SHUTDOWN_COMPLETE.AppCloseInProgress) {
                 if (pClient)
                 {
-                    EnterCriticalSection(&pClient->m_csLock);
-
-                    if (pClient->m_pfnEndFunc)
-                    {
-                        pClient->m_pfnEndFunc(pClient, pClient->m_pEndParam);
-                    }
-
-                    LeaveCriticalSection(&pClient->m_csLock);
-
+                    pClient->ProcessShutdownEvent(Event);
                     pClient->m_pMsQuic->StreamClose(Stream);
                     pClient->Release();
                 }
@@ -277,13 +264,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
 
 BOOL CQUICClient::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
 {
-    QUICSendNode* Node = (QUICSendNode*)malloc(sizeof(QUICSendNode) + Length);
-    
-    Node->Packet.Buffer = (uint8_t*)Node + sizeof(QUICSendNode);
-    Node->Packet.Length = Length;
-    Node->SyncHandle = SyncHandle;
-
-    memcpy(Node->Packet.Buffer, Data, Length);
+    QUICSendNode* Node = CreateQUICSendNode(Data, Length, SyncHandle);
 
     QUIC_STATUS Status = m_pMsQuic->StreamSend(m_hStream, &Node->Packet, 1, QUIC_SEND_FLAG_NONE, Node);
 

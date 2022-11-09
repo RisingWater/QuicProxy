@@ -36,7 +36,7 @@ typedef void (*_ClientConnectedProcess)(CQUICServer* s, CBaseObject* pParam);
 class CQUICService : public IQUICBase
 {
 public:
-    CQUICService(WORD Port, const CHAR* Keyword, CHAR* CertFilePath, CHAR* KeyFilePath);
+    CQUICService(WORD Port, const CHAR* Keyword, const CHAR* CertFilePath, const CHAR* KeyFilePath);
     virtual ~CQUICService();
 
     virtual BOOL Init();

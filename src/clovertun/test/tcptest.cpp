@@ -49,7 +49,7 @@ static BOOL TCPSocketAcceptProcess(SOCKET s, CBaseObject* pParam)
 
         if (pServer->Init())
         {
-            DBG_INFO("Client connected\r\n");
+            DBG_INFO(_T("Client connected\r\n"));
         }
     }
 

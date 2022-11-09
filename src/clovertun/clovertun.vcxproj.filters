@@ -22,15 +22,6 @@
     <ClCompile Include="ENetClient.cpp">
       <Filter>ENet</Filter>
     </ClCompile>
-    <ClCompile Include="QUICServer.cpp">
-      <Filter>QUIC</Filter>
-    </ClCompile>
-    <ClCompile Include="QUICBase.cpp">
-      <Filter>QUIC</Filter>
-    </ClCompile>
-    <ClCompile Include="QUICClient.cpp">
-      <Filter>QUIC</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -55,15 +46,6 @@
     <ClInclude Include="ENetClient.h">
       <Filter>ENet</Filter>
     </ClInclude>
-    <ClInclude Include="QUICServer.h">
-      <Filter>QUIC</Filter>
-    </ClInclude>
-    <ClInclude Include="QUICBase.h">
-      <Filter>QUIC</Filter>
-    </ClInclude>
-    <ClInclude Include="QUICClient.h">
-      <Filter>QUIC</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="UDP">
@@ -74,9 +56,6 @@
     </Filter>
     <Filter Include="ENet">
       <UniqueIdentifier>{412907e4-e6d4-42ec-a831-d089de5ef284}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="QUIC">
-      <UniqueIdentifier>{5752a921-0acd-48d6-a83c-56332606aba6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

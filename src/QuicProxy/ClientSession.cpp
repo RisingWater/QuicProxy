@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "ProxyProcessor.h"
 #include "ClientSession.h"
+#ifndef WIN32
+#include <uuid/uuid.h>
+#endif
 
 CClientSession::CClientSession(SOCKET s, CHAR* IPAddress, DWORD Port, CProxyProcessor* Processor)
 {
@@ -13,7 +16,14 @@ CClientSession::CClientSession(SOCKET s, CHAR* IPAddress, DWORD Port, CProxyProc
 		m_pProcessor->AddRef();
 	}
 
+#ifdef WIN32
 	CoCreateGuid(&m_stGuid);
+#else
+    memset(&m_stGuid, 0, sizeof(GUID));
+    uuid_t uuid;
+    uuid_generate(uuid);
+	memcpy(&m_stGuid, &uuid, sizeof(GUID));
+#endif
 
 	m_pRecvThread = CreateIThreadInstance(CClientSession::SocketRecvProcessDelegate, this);
 }
@@ -76,7 +86,7 @@ void CClientSession::RecvProcess(char* buffer, DWORD len)
 	while (left > 0)
 	{
 		int sendlen = send(m_hSocket, ptr, left, 0);
-		if (sendlen <= 0)
+     	if (sendlen <= 0)
 		{
 			return;
 		}
@@ -124,6 +134,6 @@ BOOL CClientSession::SocketRecvProcess()
 	}
 
 	m_pProcessor->SendDataToProxy(m_stGuid, data, recvlen);
-
+    
 	return TRUE;
 }

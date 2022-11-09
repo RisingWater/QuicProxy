@@ -14,11 +14,6 @@
 #define MODULE_NAME _T("CThread")
 #ifndef WIN32
 #include <pthread.h>
-
-void  __attribute__((weak))  winpr_get_version(int* major, int* minor, int* revision) {
-   *major = 1;
-}
-
 #endif
 
 #define INVALID_THREAD_ID ((DWORD)-1)
@@ -126,26 +121,6 @@ void CThread::StopMainThread()
 DWORD WINAPI CThread::MainThread(LPVOID Lp)
 {
     CThread* Thread = (CThread*)Lp;
-
-#ifndef WIN32
-#ifndef WINPR3
-    int major = 0;
-    int  minor=0;
-    int  revision=0;
-
-    winpr_get_version(&major,&minor, &revision);
-    L_INFO(_T("winpr_get_version %d \r\n"), major);
-
-    if (major == 3)
-    {
-        ;
-    }
-    else
-    {
-      pthread_detach(pthread_self());
-    }
-#endif
-#endif
 
 	if (Thread)
 	{

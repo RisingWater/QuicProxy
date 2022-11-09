@@ -12,9 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ENetClient.cpp" />
-    <ClCompile Include="QUICBase.cpp" />
-    <ClCompile Include="QUICClient.cpp" />
-    <ClCompile Include="QUICServer.cpp" />
     <ClCompile Include="TCPBase.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="TCPCommon.cpp" />
@@ -24,9 +21,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ENetClient.h" />
-    <ClInclude Include="QUICBase.h" />
-    <ClInclude Include="QUICClient.h" />
-    <ClInclude Include="QUICServer.h" />
     <ClInclude Include="TCPBase.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPCommon.h" />

@@ -11,7 +11,7 @@ typedef enum
 	PROXY_TYPE_CONNECT = 0,
 	PROXY_TYPE_DATA = 1,
 	PROXY_TYPE_DISCONNECT = 2,
-};
+} PROXY_PACKET_TYPE;
 
 typedef struct
 {
@@ -68,12 +68,7 @@ BOOL CProxyProcessor::Init(CHAR* szConfigPath)
 
     LeaveCriticalSection(&m_csQuicLock);
 
-	char pszFileName[MAX_PATH] = { 0 };
-	GetModuleFileNameA(NULL, pszFileName, MAX_PATH);
-	(strrchr(pszFileName, '\\'))[0] = 0;
-	sprintf(pszFileName, "%s\\%s", pszFileName, "NepProxyConf.ini");
-
-	IFileIni* Ini = CreateIFileIniInstance(pszFileName);
+    IFileIni* Ini = CreateIFileIniInstance(szConfigPath);
 
 	char service[1024] = { 0 };
 
@@ -272,6 +267,7 @@ void CProxyProcessor::SocketRecvCallback(PBYTE buffer, int len)
 		CClientSession* session = FindSessionByGUID(Header->stGuid);
 		if (session != NULL)
 		{
+            DBG_INFO(GUID_FORMAT _T("Recv Disconnect\r\n"), GUID_STRING(Header->stGuid));
 			RemoveProxySession(session);
 			session->Done();
 			session->Release();
@@ -286,6 +282,7 @@ void CProxyProcessor::SocketRecvCallback(PBYTE buffer, int len)
 		CClientSession* session = FindSessionByGUID(Header->stGuid);
 		if (session)
 		{
+            //DBG_INFO(GUID_FORMAT _T("Recv Data len %d\r\n"), GUID_STRING(Header->stGuid), Data->dwLength);
 			session->RecvProcess((char*)Data->Data, Data->dwLength);
 			session->Release();
 		}
@@ -304,6 +301,8 @@ void CProxyProcessor::SendDataToProxy(GUID guid, char* buffer, DWORD len)
 	memcpy(&header->Header.stGuid, &guid, sizeof(GUID));
 	header->dwLength = len;
 	memcpy(header->Data, buffer, len);
+
+    //DBG_INFO(GUID_FORMAT _T("Send Data len %d\r\n"), GUID_STRING(guid), len);
     
     EnterCriticalSection(&m_csQuicLock);
 
@@ -326,6 +325,8 @@ void CProxyProcessor::SendDisconnectToProxy(GUID guid)
 	Disconnet.Header.dwType = PROXY_TYPE_DISCONNECT;
 	memcpy(&Disconnet.Header.stGuid, &guid, sizeof(GUID));
 
+    DBG_INFO(GUID_FORMAT _T("Send Disconnect\r\n"), GUID_STRING(guid));
+
     EnterCriticalSection(&m_csQuicLock);
 
     if (m_pQuicChannel)
@@ -347,6 +348,11 @@ void CProxyProcessor::SendConnectToProxy(GUID guid, CHAR* ip, DWORD Port)
 
 	strcpy(Connet.szIPAddress, ip);
 	Connet.dwPort = Port;
+#ifdef UNICODE
+    DBG_INFO(GUID_FORMAT _T("Send connect to %S:%d\r\n"), GUID_STRING(guid), ip, Port);
+#else
+    DBG_INFO(GUID_FORMAT _T("Send connect to %s:%d\r\n"), GUID_STRING(guid), ip, Port);
+#endif
 
     EnterCriticalSection(&m_csQuicLock);
 

@@ -37,16 +37,4 @@ private:
     CRITICAL_SECTION m_csEndLock;
 };
 
-#ifndef WIN32
-#if defined __cplusplus
-extern "C" {
-#endif
-
-    void winpr_get_version(int* major, int* minor, int* revision)  __attribute__((weak)) ;
-
-#if defined __cplusplus
-}
-#endif
-#endif
-
 #endif

@@ -5,7 +5,6 @@
 
 #include "msquic.h"
 #include "BaseObject.h"
-#include "packetunit.h"
 #include <list>
 
 typedef struct
@@ -13,6 +12,12 @@ typedef struct
     QUIC_BUFFER Packet;
     HANDLE      SyncHandle;
 } QUICSendNode;
+
+typedef struct
+{
+    DWORD       Length;
+    BYTE        Data[0];
+} QUICPkt;
 
 typedef enum
 {
@@ -56,11 +61,23 @@ public:
     virtual VOID RegisterEndProcess(_QUICDisconnectedProcess Process, CBaseObject* Param);
 
 protected:    
+    void ProcessRecvEvent(QUIC_STREAM_EVENT* RecvEvent);
+    void ProcessShutdownEvent(QUIC_STREAM_EVENT* ShutdownEvent);
+    void ProcessSendCompleteEvent(QUIC_STREAM_EVENT* SendCompleteEvent);
+
+    QUICSendNode* CreateQUICSendNode(PBYTE Data, DWORD Length, HANDLE SyncHandle);
+
+private:
+    void AddQuicBufferToDataBuffer(const QUIC_BUFFER* quicBuffer);
+    QUICPkt* GetQuicPktFromDataBuffer();
+
     CRITICAL_SECTION m_csLock;
     _QUICRecvPacketProcess m_pfnRecvFunc;
     _QUICDisconnectedProcess m_pfnEndFunc;
     CBaseObject* m_pRecvParam;
     CBaseObject* m_pEndParam;
+
+    HANDLE m_hDataBufferStream;
 };
 
 

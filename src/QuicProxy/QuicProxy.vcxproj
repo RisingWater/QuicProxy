@@ -52,11 +52,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)include/BaseObject;$(SolutionDir)include/corelib;$(SolutionDir)3rdparty/msquic/include;$(SolutionDir)include/EnhanceLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../QuicCommLib;$(SolutionDir)include/BaseObject;$(SolutionDir)include/corelib;$(SolutionDir)3rdparty/msquic/include;$(SolutionDir)include/EnhanceLib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -72,18 +72,12 @@
     <ClCompile Include="ProxyProcessor.cpp" />
     <ClCompile Include="ProxyService.cpp" />
     <ClCompile Include="ClientSession.cpp" />
-    <ClCompile Include="QUICBase.cpp" />
-    <ClCompile Include="QUICClient.cpp" />
-    <ClCompile Include="QUICServer.cpp" />
     <ClCompile Include="SocketProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ProxyProcessor.h" />
     <ClInclude Include="ProxyService.h" />
     <ClInclude Include="ClientSession.h" />
-    <ClInclude Include="QUICBase.h" />
-    <ClInclude Include="QUICClient.h" />
-    <ClInclude Include="QUICServer.h" />
     <ClInclude Include="SocketProxy.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
@@ -93,6 +87,9 @@
     </ProjectReference>
     <ProjectReference Include="..\EnhanceLib\EnhanceLib.vcxproj">
       <Project>{4c30fb2e-7e5d-4e4f-ab23-e0f0ce6911d3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\QuicCommLib\QuicCommLib.vcxproj">
+      <Project>{a43bce43-1963-4f87-b3fa-8cf977567ec0}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

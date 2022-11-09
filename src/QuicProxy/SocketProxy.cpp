@@ -96,14 +96,22 @@ BOOL CProxySession::Init()
 	Ret = connect(sock, (struct sockaddr *)&DstAddress, sizeof(sockaddr_in));
 	if (Ret < 0)
 	{
+#ifdef UNICODE
+        DBG_TRACE(_T("connect to %S:%d failed\r\n"), m_szIPAddress, m_dwPort);
+#else
 		DBG_TRACE(_T("connect to %s:%d failed\r\n"), m_szIPAddress, m_dwPort);
+#endif
 		closesocket(sock);
 		return FALSE;
 	}
 
 	m_hSocket = sock;
 
+#ifdef UNICODE
+    DBG_TRACE(_T("connect to %S:%d ok\r\n"), m_szIPAddress, m_dwPort);
+#else
 	DBG_TRACE(_T("connect to %s:%d ok\r\n"), m_szIPAddress, m_dwPort);
+#endif
 
 	if (m_pRecvThread)
 	{
@@ -165,7 +173,7 @@ BOOL CProxySession::SocketRecvProcess()
 	}
 
 	m_pProxy->SendDataToProxy(m_stGuid, data, recvlen);
-
+    
 	return TRUE;
 }
 
@@ -176,8 +184,8 @@ void CProxySession::RecvProcess(char* buffer, DWORD len)
 
 	while (left > 0)
 	{
-		int sendlen = send(m_hSocket, ptr, left, 0);
-		if (sendlen <= 0)
+    	int sendlen = send(m_hSocket, ptr, left, 0);
+    	if (sendlen <= 0)
 		{
 			DBG_TRACE(_T("session send failed\r\n"));
 			return;
@@ -336,12 +344,12 @@ VOID CSocketProxy::QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject
 void CSocketProxy::SocketRecvCallback(PBYTE buffer, DWORD len)
 {
 	PROXY_HEADER* Header = (PROXY_HEADER*)buffer;
-
+    
 	switch (Header->dwType)
 	{
 		case PROXY_TYPE_CONNECT:
 		{
-			DBG_TRACE(_T("new session connect\r\n"));
+            DBG_INFO(GUID_FORMAT _T("Recv Connect\r\n"), GUID_STRING(Header->stGuid));
 			CProxySession* session = FindSessionByGUID(Header->stGuid);
 			if (session != NULL)
 			{
@@ -369,7 +377,7 @@ void CSocketProxy::SocketRecvCallback(PBYTE buffer, DWORD len)
 
 		case PROXY_TYPE_DISCONNECT:
 		{
-			DBG_TRACE(_T("new session disconnect\r\n"));
+            DBG_INFO(GUID_FORMAT _T("Recv Disconnect\r\n"), GUID_STRING(Header->stGuid));
 			CProxySession* session = FindSessionByGUID(Header->stGuid);
 			if (session != NULL)
 			{
@@ -387,6 +395,7 @@ void CSocketProxy::SocketRecvCallback(PBYTE buffer, DWORD len)
 			CProxySession* session = FindSessionByGUID(Header->stGuid);
 			if (session)
 			{
+                //DBG_INFO(GUID_FORMAT _T("Recv Data len %d\r\n"), GUID_STRING(Header->stGuid), Data->dwLength);
 				session->RecvProcess((char*)Data->Data, Data->dwLength);
 				session->Release();
 			}
@@ -405,6 +414,8 @@ void CSocketProxy::SendDataToProxy(GUID guid, char* buffer, DWORD len)
 	memcpy(&header->Header.stGuid, &guid, sizeof(GUID));
 	header->dwLength = len;
 	memcpy(header->Data, buffer, len);
+
+    //DBG_INFO(GUID_FORMAT _T("Send Data len %d\r\n"), GUID_STRING(guid), len);
 
     EnterCriticalSection(&m_csQuicLock);
 
@@ -426,6 +437,8 @@ void CSocketProxy::SendDisconnectToProxy(GUID guid)
 
 	Disconnet.Header.dwType = PROXY_TYPE_DISCONNECT;
 	memcpy(&Disconnet.Header.stGuid, &guid, sizeof(GUID));
+
+    DBG_INFO(GUID_FORMAT _T("Send Disconnect\r\n"), GUID_STRING(guid));
 
     EnterCriticalSection(&m_csQuicLock);
 

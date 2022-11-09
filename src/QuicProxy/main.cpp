@@ -18,7 +18,7 @@ typedef enum
 } PROXY_ROLE_TYPE;
 
 const CHAR* roleTypeName[] = {
-    "proxyerver",
+    "proxyserver",
     "proxyclient",
     "proxymax"
 };
@@ -34,9 +34,13 @@ static BOOL GetFullPathRelative(const CHAR *filename, CHAR* filePath, DWORD file
     }
 
     memset(tmp, 0, filePathSize);
+#ifdef WIN32    
     GetModuleFileNameA(NULL, tmp, MAX_PATH);
+#else
+    strcpy(tmp, getenv("HOME"));
+#endif
 
-    p = strchr(tmp, _T('\\'));
+    p = strrchr(tmp, _T('\\'));
     if (p != NULL)
     {
         *(p + 1) = NULL;
@@ -51,11 +55,18 @@ static BOOL GetFullPathRelative(const CHAR *filename, CHAR* filePath, DWORD file
 
         strcat(tmp, filename);
 
+#ifdef WIN32
         DWORD ret = GetFullPathNameA(tmp, MAX_PATH, filePath, NULL);
+
         if (ret > 0 && ret <= MAX_PATH)
         {
             return TRUE;
         }
+#else
+        strcpy(filePath, tmp);
+        return TRUE;
+#endif
+
     }
 
     return FALSE;
@@ -123,6 +134,7 @@ static void QUICClientConnectedProcess(CQUICServer* s, CBaseObject* pParam)
 {
     if (s)
     {
+        DBG_INFO(_T("new quic stream\r\n"));
         CSocketProxy* proxy = new CSocketProxy(s);
         proxy->Init();
     }
@@ -188,10 +200,16 @@ int main(int argc,char * argv[])
 
     PROXY_ROLE_TYPE roleType = GetRoleType(szConfigPath);
 
+    if (roleType == ROLE_TYPE_MAX)
+    {
+        DBG_ERROR(_T("get role failed\r\n"));
+        return -1;
+    }
+
     CHAR ipAddr[64] = { 0 };
     int port = 0;
 
-    if (GetAddressAndPort(szConfigPath, ipAddr, 64, &port))
+    if (!GetAddressAndPort(szConfigPath, ipAddr, 64, &port))
     {
         DBG_ERROR(_T("get config address and port failed\r\n"));
         return -1;
