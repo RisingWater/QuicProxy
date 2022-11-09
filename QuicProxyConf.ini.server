@@ -1,0 +1,5 @@
+[config]
+role=proxyserver
+proxy_server=127.0.0.1:7896
+service=test
+
