@@ -30,7 +30,7 @@ ADD_EXECUTABLE(${TARGET} ${SRC_FILES})
 TARGET_LINK_LIBRARIES(${TARGET}
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libclovertun.a
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libcorelib.a
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libQuicCommLib.a
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libQuicComm.so
     ${WINPR_PATH}/lib/${LIB_PLATFORM}/libwinpr3.a
     ${CMAKE_SOURCE_DIR}/3rdparty/msquic/lib/${LIB_PLATFORM}/libmsquic.so.2
     ssl

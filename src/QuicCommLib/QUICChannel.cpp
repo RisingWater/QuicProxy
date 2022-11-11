@@ -37,7 +37,7 @@ CQUICChannel::CQUICChannel(HQUIC hStream, const QUIC_API_TABLE* pMsQuicAPI)
     m_bIsClient = FALSE;
 }
 
-CQUICChannel::CQUICChannel(const QUIC_API_TABLE* pMsQuicAPI, CHAR* ChannelName, WORD Priority)
+CQUICChannel::CQUICChannel(const QUIC_API_TABLE* pMsQuicAPI, const CHAR* ChannelName, WORD Priority)
     : CBaseObject()
 {
     m_hStream = NULL;
@@ -155,7 +155,7 @@ BOOL CQUICChannel::Init(HQUIC hConnection)
     else
     {
         AddRef();
-        m_pMsQuic->SetCallbackHandler(m_hStream, CQUICChannel::ClientStreamCallback, this);
+        m_pMsQuic->SetCallbackHandler(m_hStream, (void*)CQUICChannel::ClientStreamCallback, this);
 
         return TRUE;
     }
@@ -208,7 +208,7 @@ QUIC_STATUS CQUICChannel::ClientStreamCallback(
     }
     case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
     {
-        DBG_INFO(_T("[strm][%p] Peer aborted %d\n"), Stream, Event->PEER_SEND_ABORTED.ErrorCode);
+        DBG_INFO(_T("[strm][%p] Peer aborted\n"), Stream);
         if (pChannel && !pChannel->m_bIsClient)
         {
             pChannel->m_pMsQuic->StreamShutdown(Stream, QUIC_STREAM_SHUTDOWN_FLAG_ABORT, 0);

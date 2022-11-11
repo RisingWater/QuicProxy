@@ -35,7 +35,11 @@ extern CRITICAL_SECTION g_RecvByetLock;
 
 BOOL QUICServerChannelProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param)
 {
+#ifdef UNICODE
     DBG_INFO(_T("Channel[%S] recv %S\r\n"), quic->GetChannelName(), Data);
+#else
+    DBG_INFO(_T("Channel[%s] recv %s\r\n"), quic->GetChannelName(), Data);
+#endif
     quic->SendPacket(Data, Length);
 
     return TRUE;
@@ -119,7 +123,11 @@ void QUICServerTest(int port)
 
 BOOL QUICClientChannelProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param)
 {
+#ifdef UNICODE
     DBG_INFO(_T("Channel[%S] recv %S\r\n"), quic->GetChannelName(), Data);
+#else
+    DBG_INFO(_T("Channel[%s] recv %s\r\n"), quic->GetChannelName(), Data);
+#endif
     quic->SendPacket(Data, Length);
 
     return TRUE;
@@ -160,7 +168,7 @@ void QUICClientTest(char* address, int port)
 
         if (strcmp(resp, "ok") != 0)
         {
-            DBG_ERROR(_T("PACKET1 failed %d\r\n"), resp);
+            DBG_ERROR(_T("PACKET1 failed %s\r\n"), resp);
             return;
         }
 
@@ -188,7 +196,7 @@ void QUICClientTest(char* address, int port)
 
         if (strcmp(resp, "ok") != 0)
         {
-            DBG_ERROR(_T("PACKET2 failed %d\r\n"), resp);
+            DBG_ERROR(_T("PACKET2 failed %s\r\n"), resp);
             return;
         }
 

@@ -25,7 +25,7 @@ class CQUICChannel : public IQUICChannel
 public:
     CQUICChannel(HQUIC hStream, const QUIC_API_TABLE* pMsQuicAPI);
 
-    CQUICChannel(const QUIC_API_TABLE* pMsQuicAPI, CHAR* ChannelName, WORD Priority);
+    CQUICChannel(const QUIC_API_TABLE* pMsQuicAPI, const CHAR* ChannelName, WORD Priority);
 
     LONG GetChannelID();
 
