@@ -7,14 +7,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+#pragma warning(disable:4127)
+#pragma warning(disable:4200)
+#pragma warning(disable:4250)
+#pragma warning(disable:4996)
+
 #ifdef WIN32
 #include <WinSock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
 #include <tchar.h>
-#pragma warning(disable:4127)
-#pragma warning(disable:4200)
-#pragma warning(disable:4996)
 #else
 #include <errno.h>
 #include "winpr/wtypes.h"

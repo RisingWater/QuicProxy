@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "QUICClient.h"
 
-CQUICClient::CQUICClient(CHAR* ipaddr, WORD dstPort, const CHAR* Keyword) :
-    IQUICBase(),
-    IQUICCommunication()
+CQUICClient::CQUICClient(CHAR* ipaddr, WORD dstPort, const CHAR* Keyword) : CQUICBase(), CQUICLink()
 {
     m_wDstPort = dstPort;
     m_szIPAddress = strdup(ipaddr);
@@ -12,7 +10,6 @@ CQUICClient::CQUICClient(CHAR* ipaddr, WORD dstPort, const CHAR* Keyword) :
     m_stKeyword.Buffer = (uint8_t*)Keyword;
 
     m_hConnection = NULL;
-    m_hStream = NULL;
 
     m_hConnectOK = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -23,9 +20,14 @@ CQUICClient::~CQUICClient()
     {
         free(m_szIPAddress);
     }
+
+    if (m_hConnectOK)
+    {
+        CloseHandle(m_hConnectOK);
+    }
 }
 
-BOOL CQUICClient::Init()
+BOOL CQUICClient::Connect()
 {
     BaseInit(QUICBASE_HIGH_THOUGHPUT);
 
@@ -51,27 +53,59 @@ BOOL CQUICClient::Init()
         goto Error;
     }
 
+    DBG_INFO(_T("[conn][%p] Connecting Start end\n"), m_hConnection);
+
     if (WaitForSingleObject(m_hConnectOK, 10000) != WAIT_OBJECT_0)
     {
         DBG_ERROR(_T("Wait for connect time out\n"));
         goto Error;
     }
 
+    EnterCriticalSection(&m_csLock);
+    m_pCtrlChannel = new CQUICCtrlChannel();
+    m_pCtrlChannel->Init(m_pMsQuic, m_hConnection);
+    LeaveCriticalSection(&m_csLock);
+
     return TRUE;
 
 Error:
-    Done();
+    Disconnect();
     return FALSE;
 }
 
-VOID CQUICClient::Done()
+VOID CQUICClient::Disconnect()
 {
+    LinkDone();
+
     if (m_hConnection)
     {
         m_pMsQuic->ConnectionClose(m_hConnection);
     }
 
     BaseDone();
+}
+
+IQUICChannel* CQUICClient::CreateChannel(CHAR* ChannelName, WORD Priority)
+{
+    CQUICChannel* channel = new CQUICChannel(m_pMsQuic, ChannelName, Priority);
+    if (channel)
+    {
+        if (channel->Init(m_hConnection))
+        {
+            channel->AddRef();
+
+            EnterCriticalSection(&m_csLock);
+            m_Streams.push_back(channel);
+            LeaveCriticalSection(&m_csLock);
+        }
+        else
+        {
+            channel->Release();
+            channel = NULL;
+        }
+    }
+
+    return channel;
 }
 
 VOID CQUICClient::LoadConfiguration()
@@ -83,6 +117,9 @@ VOID CQUICClient::LoadConfiguration()
 
     Settings.KeepAliveIntervalMs = 2000;
     Settings.IsSet.KeepAliveIntervalMs = TRUE;
+
+    Settings.PeerBidiStreamCount = 1024;
+    Settings.IsSet.PeerBidiStreamCount = TRUE;
 
     QUIC_CREDENTIAL_CONFIG CredConfig;
     memset(&CredConfig, 0, sizeof(CredConfig));
@@ -107,98 +144,6 @@ VOID CQUICClient::LoadConfiguration()
     return;
 }
 
-void CQUICClient::InitializeConnection(HQUIC Connection)
-{
-    QUIC_STATUS Status;
-
-    AddRef();
-    Status = m_pMsQuic->StreamOpen(Connection, QUIC_STREAM_OPEN_FLAG_NONE, ClientStreamCallback, this, &m_hStream);
-    if (QUIC_FAILED(Status))
-    {
-        DBG_ERROR(_T("StreamOpen failed, 0x%x!\n"), Status);
-        Release();
-        goto Error;
-    }
-
-    DBG_INFO(_T("[strm][%p] Starting...\n"), m_hStream);
-
-    Status = m_pMsQuic->StreamStart(m_hStream, QUIC_STREAM_START_FLAG_IMMEDIATE);
-
-    if (QUIC_FAILED(Status))
-    {
-        DBG_ERROR(_T("StreamStart failed, 0x%x!\n"), Status);
-        m_pMsQuic->StreamClose(m_hStream);
-        goto Error;
-    }
-
-    SetEvent(m_hConnectOK);
-
-Error:
-    if (QUIC_FAILED(Status))
-    {
-        m_pMsQuic->ConnectionShutdown(Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
-    }
-}
-
-QUIC_STATUS CQUICClient::ClientStreamCallback(
-    _In_ HQUIC Stream,
-    _In_opt_ void* Context,
-    _Inout_ QUIC_STREAM_EVENT* Event
-    )
-{
-    CQUICClient* pClient = (CQUICClient*)Context;
-
-    switch (Event->Type)
-    {
-        case QUIC_STREAM_EVENT_SEND_COMPLETE:
-        {
-            if (pClient)
-            {
-                pClient->ProcessSendCompleteEvent(Event);
-            }
-            
-            break;
-        }
-        case QUIC_STREAM_EVENT_RECEIVE:
-        {
-            if (pClient)
-            {
-                pClient->ProcessRecvEvent(Event);
-            }
-            break;
-        }
-        case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
-        {
-            DBG_INFO(_T("[strm][%p] Peer aborted\n"), Stream);
-            break;
-        }
-        case QUIC_STREAM_EVENT_PEER_SEND_SHUTDOWN:
-        {
-            DBG_INFO(_T("[strm][%p] Peer shut down\n"), Stream);
-            break;
-        }
-        case QUIC_STREAM_EVENT_SHUTDOWN_COMPLETE:
-        {
-            DBG_INFO(_T("[strm][%p] All done\n"), Stream);
-            if (!Event->SHUTDOWN_COMPLETE.AppCloseInProgress) {
-                if (pClient)
-                {
-                    pClient->ProcessShutdownEvent(Event);
-                    pClient->m_pMsQuic->StreamClose(Stream);
-                    pClient->Release();
-                }
-            }
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    return QUIC_STATUS_SUCCESS;
-}
-
 QUIC_STATUS CQUICClient::ClientConnectionCallback(
     _In_ HQUIC Connection,
     _In_opt_ void* Context,
@@ -214,7 +159,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
             DBG_INFO(_T("[conn][%p] Connected\n"), Connection);
             if (pClient)
             {
-                pClient->InitializeConnection(Connection);
+                SetEvent(pClient->m_hConnectOK);
             }
             break;
         }
@@ -250,10 +195,6 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
         case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
         {
             DBG_INFO(_T("[conn][%p] Resumption ticket received (%u bytes):\n"), Connection, Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength);
-            //for (uint32_t i = 0; i < Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicketLength; i++) {
-            //    DBG_INFO("%.2X", (uint8_t)Event->RESUMPTION_TICKET_RECEIVED.ResumptionTicket[i]);
-            //}
-            //DBG_INFO("\n");
             break;
         }
     default:
@@ -262,18 +203,3 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
     return QUIC_STATUS_SUCCESS;
 }
 
-BOOL CQUICClient::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
-{
-    QUICSendNode* Node = CreateQUICSendNode(Data, Length, SyncHandle);
-
-    QUIC_STATUS Status = m_pMsQuic->StreamSend(m_hStream, &Node->Packet, 1, QUIC_SEND_FLAG_NONE, Node);
-
-    if (QUIC_FAILED(Status))
-    {
-        DBG_ERROR(_T("StreamSend failed, 0x%x!\n"), Status);
-        free(Node);
-        return FALSE;
-    }
-
-    return TRUE;
-}

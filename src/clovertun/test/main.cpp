@@ -3,6 +3,7 @@
 #ifdef WIN32
 #define ENET_SUPPORT
 #include "enet/enet.h"
+#pragma comment( linker, "/subsystem:\"console\" /entry:\"mainCRTStartup\"")
 #endif
 typedef enum
 {
@@ -17,15 +18,15 @@ typedef enum
     ROLE_TYPE_MAX
 } ROLE_TYPE;
 
-const TCHAR* roleTypeName[] = {
-    _T("tcpserver"),
-    _T("tcpclient"),
-    _T("udpserver"),
-    _T("udpclient"),
-    _T("enetserver"),
-    _T("enetclient"),
-    _T("quicserver"),
-    _T("quicclient")
+const CHAR* roleTypeName[] = {
+    ("tcpserver"),
+    ("tcpclient"),
+    ("udpserver"),
+    ("udpclient"),
+    ("enetserver"),
+    ("enetclient"),
+    ("quicserver"),
+    ("quicclient")
 };
 
 extern void TCPServerTest(int port);
@@ -69,10 +70,10 @@ DWORD WINAPI TimerProc(void* pParam)
     return 0;
 }
 
-int main(int argc, TCHAR* argv[])
+int main(int argc, CHAR* argv[])
 {
 	int c;
-
+    
     char ipAddr[64] = { 0 };
     int port = 0;
     ROLE_TYPE roleType = ROLE_TYPE_MAX;
@@ -87,17 +88,21 @@ int main(int argc, TCHAR* argv[])
     enet_initialize();
 #endif
 
-	while ((c = getopt(argc, argv, _T("t:a:p:"))) != -1)
+	while ((c = getopt(argc, argv, "t:a:p:")) != -1)
     {
         switch (c)
         {
             case 't':
             {
+#ifdef UNICODE
+                DBG_INFO(_T("name: %S\n"), optarg);
+#else
                 DBG_INFO(_T("name: %s\n"), optarg);
+#endif
 
                 for (int i = 0; i < ROLE_TYPE_MAX; i++)
                 {
-                    if (_tcscmp(roleTypeName[i], optarg) == 0)
+                    if (strcmp(roleTypeName[i], optarg) == 0)
                     {
                         roleType = (ROLE_TYPE)i;
                         break;
@@ -120,11 +125,8 @@ int main(int argc, TCHAR* argv[])
             case 'p':
             {
                 TCHAR* end = NULL;
-#ifdef UNICODE
-                int tmpPort = _ttoi(optarg);
-#else
                 int tmpPort = atoi(optarg);
-#endif
+
                 DBG_INFO(_T("port: %d\n"), tmpPort);
                 port = tmpPort;
                 break;
@@ -133,12 +135,12 @@ int main(int argc, TCHAR* argv[])
             {
                 if (!isServer)
                 {
-                    DBG_INFO(_T("addr: %s\n"), optarg);
 #ifdef UNICODE
-                    sprintf(ipAddr, "%S", optarg);
+                    DBG_INFO(_T("addr: %S\n"), optarg);
 #else
-                    strcpy(ipAddr, optarg);
+                    DBG_INFO(_T("addr: %s\n"), optarg);
 #endif
+                    strcpy(ipAddr, optarg);
                 }
                 break;
             }

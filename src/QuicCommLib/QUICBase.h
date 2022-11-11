@@ -5,19 +5,8 @@
 
 #include "msquic.h"
 #include "BaseObject.h"
+#include "QUICCommLib.h"
 #include <list>
-
-typedef struct
-{
-    QUIC_BUFFER Packet;
-    HANDLE      SyncHandle;
-} QUICSendNode;
-
-typedef struct
-{
-    DWORD       Length;
-    BYTE        Data[0];
-} QUICPkt;
 
 typedef enum
 {
@@ -27,19 +16,16 @@ typedef enum
     QUICBASE_REALTIME,
 } QUICBASE_TYPE;
 
-class IQUICCommunication;
-typedef BOOL(*_QUICRecvPacketProcess)(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param);
-typedef void(*_QUICDisconnectedProcess)(IQUICCommunication* s, CBaseObject* pParam);
+class CQUICChannel;
+class CQUICCtrlChannel;
 
-class IQUICBase : public CBaseObject
+class CQUICBase
 {
 public:
-    IQUICBase();
-    virtual ~IQUICBase();
-
-    virtual BOOL Init() = 0;
-    virtual VOID Done() = 0;
-
+    CQUICBase();
+    
+    virtual ~CQUICBase();
+    
 protected:
     virtual BOOL BaseInit(QUICBASE_TYPE Type);
     virtual VOID BaseDone();
@@ -50,35 +36,30 @@ protected:
     HQUIC m_hConfiguration;
 };
 
-class IQUICCommunication
+class CQUICLink : public virtual IQUICLink
 {
 public:
-    IQUICCommunication();
-    virtual ~IQUICCommunication();
+    CQUICLink();
 
-    virtual BOOL SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle = NULL) = 0;
-    virtual VOID RegisterRecvProcess(_QUICRecvPacketProcess Process, CBaseObject* Param);
-    virtual VOID RegisterEndProcess(_QUICDisconnectedProcess Process, CBaseObject* Param);
+    virtual ~CQUICLink();
 
-protected:    
-    void ProcessRecvEvent(QUIC_STREAM_EVENT* RecvEvent);
-    void ProcessShutdownEvent(QUIC_STREAM_EVENT* ShutdownEvent);
-    void ProcessSendCompleteEvent(QUIC_STREAM_EVENT* SendCompleteEvent);
+    virtual BOOL SendCtrlPacket(PBYTE Data, DWORD DataLen);
 
-    QUICSendNode* CreateQUICSendNode(PBYTE Data, DWORD Length, HANDLE SyncHandle);
+    virtual PBYTE RecvCtrlPacket(DWORD* DataLen, DWORD TimeOut);
 
-private:
-    void AddQuicBufferToDataBuffer(const QUIC_BUFFER* quicBuffer);
-    QUICPkt* GetQuicPktFromDataBuffer();
+    virtual void FreeRecvedCtrlPacket(PBYTE Data);
+
+    virtual void DestoryChannel(IQUICChannel* channel);
+
+protected:
+
+    void LinkDone();
 
     CRITICAL_SECTION m_csLock;
-    _QUICRecvPacketProcess m_pfnRecvFunc;
-    _QUICDisconnectedProcess m_pfnEndFunc;
-    CBaseObject* m_pRecvParam;
-    CBaseObject* m_pEndParam;
 
-    HANDLE m_hDataBufferStream;
+    std::list<CQUICChannel*> m_Streams;
+
+    CQUICCtrlChannel* m_pCtrlChannel;
 };
-
 
 #endif

@@ -1,0 +1,4 @@
+﻿LIBRARY libQuicComm
+EXPORTS CreateIQUICService
+        CreateIQUICClient
+		

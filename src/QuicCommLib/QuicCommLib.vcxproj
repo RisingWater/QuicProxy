@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A43BCE43-1963-4F87-B3FA-8CF977567EC0}</ProjectGuid>
     <RootNamespace>QuicCommLib</RootNamespace>
+    <ProjectName>libQuicComm</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -22,7 +23,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -38,7 +39,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -52,7 +55,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -63,18 +66,40 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>QuicCommLib.def</ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdparty/msquic/lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>msquic.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="QUICBase.h" />
+    <ClInclude Include="QUICChannel.h" />
     <ClInclude Include="QUICClient.h" />
+    <ClInclude Include="QUICCtrlChannel.h" />
+    <ClInclude Include="QUICCommLib.h" />
     <ClInclude Include="QUICServer.h" />
+    <ClInclude Include="QUICService.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="QUICBase.cpp" />
+    <ClCompile Include="QUICChannel.cpp" />
     <ClCompile Include="QUICClient.cpp" />
+    <ClCompile Include="QUICCommLib.cpp" />
+    <ClCompile Include="QUICCtrlChannel.cpp" />
     <ClCompile Include="QUICServer.cpp" />
+    <ClCompile Include="QUICService.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="QuicCommLib.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\corelib\corelib.vcxproj">
+      <Project>{6162410e-47fd-4b76-9d7d-37be6a41293a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\EnhanceLib\EnhanceLib.vcxproj">
+      <Project>{4c30fb2e-7e5d-4e4f-ab23-e0f0ce6911d3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

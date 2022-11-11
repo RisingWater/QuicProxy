@@ -13,7 +13,7 @@
 #include <string.h>
 
 static int optind = 0;
-static TCHAR *optarg;
+static CHAR *optarg;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -22,9 +22,9 @@ static TCHAR *optarg;
 //       getopt -- parse command line options
 //
 //  SYNOPSIS
-//       int getopt(int argc, TCHAR *argv[], TCHAR *optstring)
+//       int getopt(int argc, CHAR *argv[], CHAR *optstring)
 //
-//       extern TCHAR *optarg;
+//       extern CHAR *optarg;
 //       extern int optind;
 //
 //  DESCRIPTION
@@ -35,8 +35,8 @@ static TCHAR *optarg;
 //       variables __argc and __argv (double underscores), respectively.
 //       getopt returns the next option letter in argv that matches a
 //       letter in optstring.  (Note:  Unicode programs should use
-//       __targv instead of __argv.  Also, all character and string
-//       literals should be enclosed in _T( ) ).
+//       _argv instead of __argv.  Also, all character and string
+//       literals should be enclosed in ( ) ).
 //
 //       optstring is a string of recognized option letters;  if a letter
 //       is followed by a colon, the option is expected to have an argument
@@ -75,42 +75,42 @@ static TCHAR *optarg;
 //       5)  The automatic permutation of arguments is not supported.
 //
 //  EXAMPLE
-//       int main(int argc, TCHAR *argv[])
+//       int main(int argc, CHAR *argv[])
 //       {
 //           int c;
 //
-//           while ((c = getopt(argc, argv, _T("aBn:"))) != -1)
+//           while ((c = getopt(argc, argv, ("aBn:"))) != -1)
 //           {
 //               switch (c)
 //               {
-//                   case _T('a'):
-//                       L_TRACE(_T("option a\n"));
+//                   case ('a'):
+//                       LRACE(("option a\n"));
 //                       //
 //                       // set some flag here
 //                       //
 //                       break;
 //
-//                   case _T('B'):
-//                       L_TRACE( _T("option B\n"));
+//                   case ('B'):
+//                       LRACE( ("option B\n"));
 //                       //
 //                       // set some other flag here
 //                       //
 //                       break;
 //
-//                   case _T('n'):
-//                       L_TRACE(_T("option n: value=%d\n"), atoi(optarg));
+//                   case ('n'):
+//                       LRACE(("option n: value=%d\n"), atoi(optarg));
 //                       //
 //                       // do something with value here
 //                       //
 //                       break;
 //
-//                   case _T('?'):
-//                       L_TRACE(_T("ERROR: illegal option %s\n"), argv[optind-1]);
+//                   case ('?'):
+//                       LRACE(("ERROR: illegal option %s\n"), argv[optind-1]);
 //                       return -1;
 //                       break;
 //
 //                   default:
-//                       L_TRACE(_T("WARNING: no handler for option %c\n"), c);
+//                       LRACE(("WARNING: no handler for option %c\n"), c);
 //                       return -1;
 //                       break;
 //               }
@@ -123,11 +123,11 @@ static TCHAR *optarg;
 //
 ///////////////////////////////////////////////////////////////////////////////
 static inline int 
-getopt(int argc, TCHAR *argv[], TCHAR *optstring)
+getopt(int argc, CHAR *argv[], CHAR *optstring)
 {
-    static TCHAR *next = NULL;
-    TCHAR c;
-    TCHAR *cp;
+    static CHAR *next = NULL;
+    CHAR c;
+    CHAR *cp;
 
     if ( optind == 0 )
     {
@@ -135,14 +135,14 @@ getopt(int argc, TCHAR *argv[], TCHAR *optstring)
     }
 
     optarg = NULL;
-    if ( next == NULL || *next == _T('\0') )
+    if ( next == NULL || *next == ('\0') )
     {
         if ( optind == 0 )
         {
             optind++;
         }
 
-        if ( optind >= argc || argv[optind][0] != _T('-') || argv[optind][1] == _T('\0') )
+        if ( optind >= argc || argv[optind][0] != ('-') || argv[optind][1] == ('\0') )
         {
             optarg = NULL;
             if ( optind < argc )
@@ -152,7 +152,7 @@ getopt(int argc, TCHAR *argv[], TCHAR *optstring)
             return -1;
         }
 
-        if ( _tcscmp(argv[optind], _T("--")) == 0 )
+        if (strcmp(argv[optind], ("--")) == 0 )
         {
             optind++;
             optarg = NULL;
@@ -169,17 +169,17 @@ getopt(int argc, TCHAR *argv[], TCHAR *optstring)
     }
 
     c = *next++;
-    cp = _tcschr(optstring, c);
+    cp = strchr(optstring, c);
 
-    if ( cp == NULL || c == _T(':') )
+    if ( cp == NULL || c == (':') )
     {
-        return _T('?');
+        return ('?');
     }
 
     cp++;
-    if ( *cp == _T(':') )
+    if ( *cp == (':') )
     {
-        if ( *next != _T('\0'))
+        if ( *next != ('\0'))
         {
             optarg = next;
             next = NULL;
@@ -191,7 +191,7 @@ getopt(int argc, TCHAR *argv[], TCHAR *optstring)
         }
         else
         {
-            return _T('?');
+            return ('?');
         }
     }
 

@@ -5,10 +5,21 @@
     <ClInclude Include="QUICBase.h" />
     <ClInclude Include="QUICServer.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="QUICChannel.h" />
+    <ClInclude Include="QUICService.h" />
+    <ClInclude Include="QUICCtrlChannel.h" />
+    <ClInclude Include="QUICCommLib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="QUICClient.cpp" />
     <ClCompile Include="QUICBase.cpp" />
     <ClCompile Include="QUICServer.cpp" />
+    <ClCompile Include="QUICChannel.cpp" />
+    <ClCompile Include="QUICService.cpp" />
+    <ClCompile Include="QUICCtrlChannel.cpp" />
+    <ClCompile Include="QUICCommLib.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="QuicCommLib.def" />
   </ItemGroup>
 </Project>
