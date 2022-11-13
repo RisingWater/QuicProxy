@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "SocketProxy.h"
-#include "QUICServer.h"
+#include "QUICCommLib.h"
 
 #pragma pack(1)
 
@@ -198,23 +198,30 @@ void CProxySession::RecvProcess(char* buffer, DWORD len)
 	return;
 }
 
-CSocketProxy::CSocketProxy(CQUICServer* quicChannel)
+CSocketProxy::CSocketProxy(IQUICServer* quicChannel)
 {
     InitializeCriticalSection(&m_csLock);
     InitializeCriticalSection(&m_csQuicLock);
 
     EnterCriticalSection(&m_csQuicLock);
-    m_pQuicChannel = quicChannel;
-    if (m_pQuicChannel)
-    {
-        m_pQuicChannel->AddRef();
-    }
-
+    m_pQuicServer = quicChannel;
     LeaveCriticalSection(&m_csQuicLock);
+
+    m_hStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 CSocketProxy::~CSocketProxy()
 {
+    if (m_pQuicServer)
+    {
+        m_pQuicServer->Release();
+    }
+
+    if (m_hStopEvent)
+    {
+        CloseHandle(m_hStopEvent);
+    }
+
 	DeleteCriticalSection(&m_csLock);
     DeleteCriticalSection(&m_csQuicLock);
 }
@@ -223,10 +230,15 @@ BOOL CSocketProxy::Init()
 {
     EnterCriticalSection(&m_csQuicLock);
 
-    if (m_pQuicChannel)
+    if (m_pQuicServer)
     {
-        m_pQuicChannel->RegisterRecvProcess(CSocketProxy::QUICServerRecvPacketProcess, this);
-        m_pQuicChannel->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
+        m_pQuicChannel = m_pQuicServer->WaitForChannelReady("control", m_hStopEvent, 5000);
+        if (m_pQuicChannel)
+        {
+            m_pQuicChannel->RegisterRecvProcess(CSocketProxy::QUICServerRecvPacketProcess, this);
+            m_pQuicChannel->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
+        }
+        m_pQuicServer->SendCtrlPacket((PBYTE)"ctrl channel init ok", strlen("ctrl channel init ok") + 1);
     }
 
     LeaveCriticalSection(&m_csQuicLock);
@@ -254,11 +266,19 @@ void CSocketProxy::Done()
 
     EnterCriticalSection(&m_csQuicLock);
 
-    m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
-    m_pQuicChannel->RegisterEndProcess(NULL, NULL);
-    m_pQuicChannel->CloseConnection();
-    m_pQuicChannel->Release();
-    m_pQuicChannel = NULL;
+    if (m_pQuicServer)
+    {
+        if (m_pQuicChannel)
+        {
+            m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
+            m_pQuicChannel->RegisterEndProcess(NULL, NULL);
+            m_pQuicServer->DestoryChannel(m_pQuicChannel);
+            m_pQuicChannel->Release();
+            m_pQuicChannel = NULL;
+        }
+
+        m_pQuicServer->Disconnect();
+    }
 
     LeaveCriticalSection(&m_csQuicLock);
 
@@ -319,7 +339,7 @@ void CSocketProxy::RemoveProxySession(CProxySession* session)
 	return;
 }
 
-BOOL CSocketProxy::QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param)
+BOOL CSocketProxy::QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param)
 {
     CSocketProxy* proxy = dynamic_cast<CSocketProxy*>(Param);
 
@@ -331,7 +351,7 @@ BOOL CSocketProxy::QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCo
     return TRUE;
 }
 
-VOID CSocketProxy::QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject* Param)
+VOID CSocketProxy::QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param)
 {
     CSocketProxy* proxy = dynamic_cast<CSocketProxy*>(Param);
 

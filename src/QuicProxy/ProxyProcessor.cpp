@@ -2,6 +2,7 @@
 #include "ProxyProcessor.h"
 #include "ClientSession.h"
 #include "ProxyService.h"
+#include "QUICCommLib.h"
 #include "IOpini.h"
 
 #pragma pack(1)
@@ -38,7 +39,7 @@ typedef struct
 CProxyProcessor::CProxyProcessor(HANDLE stopEvent, CHAR* address, int port)
 {
 	m_hStopEvent = stopEvent;
-    m_pQuicChannel = new CQUICClient(address, port, "xredtest");
+    m_pQuicClient = CreateIQUICClient(address, port, "xredtest");
 
 	InitializeCriticalSection(&m_csLock);
     InitializeCriticalSection(&m_csQuicLock);
@@ -49,24 +50,60 @@ CProxyProcessor::~CProxyProcessor()
 	DeleteCriticalSection(&m_csLock);
     DeleteCriticalSection(&m_csQuicLock);
 
-    if (m_pQuicChannel)
+    if (m_pQuicClient)
     {
-        m_pQuicChannel->Release();
+        m_pQuicClient->Release();
     }
 }
 
 BOOL CProxyProcessor::Init(CHAR* szConfigPath)
 {
+    BOOL InitOK = FALSE;
     EnterCriticalSection(&m_csQuicLock);
 
-    if (m_pQuicChannel)
+    if (m_pQuicClient->Connect())
 	{
-        m_pQuicChannel->RegisterRecvProcess(CProxyProcessor::QUICClientRecvPacketProcess, this);
-        m_pQuicChannel->RegisterEndProcess(CProxyProcessor::QUICDisconnectedProcess, this);
-        m_pQuicChannel->Init();
+        m_pQuicChannel = m_pQuicClient->CreateChannel("control", 0);
+        if (m_pQuicChannel)
+        {
+            m_pQuicChannel->RegisterRecvProcess(CProxyProcessor::QUICClientRecvPacketProcess, this);
+            m_pQuicChannel->RegisterEndProcess(CProxyProcessor::QUICDisconnectedProcess, this);
+        }
+
+        DWORD len = 0;
+        PBYTE ConnectOKMsg = m_pQuicClient->RecvCtrlPacket(&len, 3000);
+        if (ConnectOKMsg != NULL)
+        {
+            DBG_INFO(_T("ConnectOKMsg: %S\r\n"), ConnectOKMsg);
+            InitOK = TRUE;
+        }
+        else
+        {
+            DBG_ERROR(_T("ConnectOKMsg: TimeOut\r\n"));
+        }
 	}
+    else
+    {
+        DBG_ERROR(_T("quic client connect failed\r\n"));
+    }
 
     LeaveCriticalSection(&m_csQuicLock);
+
+    if (!InitOK)
+    {
+        if (m_pQuicChannel)
+        {
+            m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
+            m_pQuicChannel->RegisterEndProcess(NULL, NULL);
+            m_pQuicClient->DestoryChannel(m_pQuicChannel);
+            m_pQuicChannel->Release();
+            m_pQuicChannel = NULL;
+        }
+
+        m_pQuicClient->Disconnect();
+
+        return FALSE;
+    }
 
     IFileIni* Ini = CreateIFileIniInstance(szConfigPath);
 
@@ -170,16 +207,25 @@ void CProxyProcessor::Done()
 	LeaveCriticalSection(&m_csLock);
 
     EnterCriticalSection(&m_csQuicLock);
-    if (m_pQuicChannel)
+
+    if (m_pQuicClient)
     {
-        m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
-        m_pQuicChannel->RegisterEndProcess(NULL, NULL);
-        m_pQuicChannel->Done();
+        if (m_pQuicChannel)
+        {
+            m_pQuicChannel->RegisterRecvProcess(NULL, NULL);
+            m_pQuicChannel->RegisterEndProcess(NULL, NULL);
+            m_pQuicClient->DestoryChannel(m_pQuicChannel);
+            m_pQuicChannel->Release();
+            m_pQuicChannel = NULL;
+        }
+
+        m_pQuicClient->Disconnect();
     }
+
     LeaveCriticalSection(&m_csQuicLock);
 }
 
-VOID CProxyProcessor::QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject* Param)
+VOID CProxyProcessor::QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param)
 {
     CProxyProcessor* proxy = dynamic_cast<CProxyProcessor*>(Param);
 
@@ -189,7 +235,7 @@ VOID CProxyProcessor::QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObj
     }
 }
 
-BOOL CProxyProcessor::QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param)
+BOOL CProxyProcessor::QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param)
 {
     CProxyProcessor* proxy = dynamic_cast<CProxyProcessor*>(Param);
 

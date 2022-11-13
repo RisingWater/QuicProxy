@@ -8,8 +8,9 @@
 #include <list>
 
 #include "BaseObject.h"
-#include "QUICClient.h"
 
+class IQUICClient;
+class IQUICChannel;
 class CProxyService;
 class CClientSession;
 
@@ -37,9 +38,9 @@ public:
 	void SendConnectToProxy(GUID guid, CHAR* ip, DWORD Port);
 
 private:
-    static BOOL QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param);
+    static BOOL QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param);
 
-    static VOID QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject* Param);
+    static VOID QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param);
     
     CClientSession* FindSessionByGUID(GUID guid);
 
@@ -51,7 +52,9 @@ private:
 
 	HANDLE m_hStopEvent;
 
-    CQUICClient* m_pQuicChannel;
+    IQUICClient* m_pQuicClient;
+
+    IQUICChannel* m_pQuicChannel;
 
 	CRITICAL_SECTION m_csLock;
 

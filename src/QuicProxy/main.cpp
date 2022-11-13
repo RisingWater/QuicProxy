@@ -1,6 +1,5 @@
 ﻿#include "stdafx.h"
-#include "QUICServer.h"
-#include "QUICClient.h"
+#include "QUICCommLib.h"
 #include "SocketProxy.h"
 #include "ProxyProcessor.h"
 #include "IOpini.h"
@@ -130,21 +129,9 @@ BOOL IsServer(PROXY_ROLE_TYPE roleType)
     return roleType == PROXY_SERVER;
 }
 
-static void QUICClientConnectedProcess(CQUICServer* s, CBaseObject* pParam)
-{
-    if (s)
-    {
-        DBG_INFO(_T("new quic stream\r\n"));
-        CSocketProxy* proxy = new CSocketProxy(s);
-        proxy->Init();
-    }
-
-    return;
-}
-
 void ProxyServer(int port)
 {
-    CQUICService* QUICService = NULL;
+    IQUICService* pService = NULL;
 
     CHAR CertPath[MAX_PATH] = { 0 };
     CHAR KeyPath[MAX_PATH] = { 0 };
@@ -161,19 +148,30 @@ void ProxyServer(int port)
         return;
     }
 
-    QUICService = new CQUICService(port, "xredtest", CertPath, KeyPath);
-    if (QUICService)
+    pService = CreateIQUICService(port, "xredtest", CertPath, KeyPath);
+    if (!pService->StartListen())
     {
-        QUICService->RegisterConnectedProcess(QUICClientConnectedProcess, NULL);
-        if (QUICService->Init())
-        {
-            WaitForSingleObject(g_StopEvent, INFINITE);
-
-            QUICService->RegisterConnectedProcess(NULL, NULL);
-            QUICService->Done();
-        }
-        QUICService->Release();
+        DBG_ERROR(_T("StartListen Failed\r\n"));
+        return;
     }
+
+    while (TRUE)
+    {
+        IQUICServer* pServer = pService->Accept(g_StopEvent);
+
+        if (pServer == NULL)
+        {
+            break;
+        }
+
+        CSocketProxy* pProxy = new CSocketProxy(pServer);
+        pProxy->Init();
+    }
+
+    pService->StopListen();
+    pService->Release();
+
+    return;
 }
 
 void ProxyClient(CHAR* ConfigPath, CHAR* address, int port)
@@ -192,10 +190,18 @@ int main(int argc,char * argv[])
 {
     g_StopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     CHAR szConfigPath[MAX_PATH] = { 0 };
-    if (!GetFullPathRelative("QuicProxyConf.ini", szConfigPath, MAX_PATH))
+
+    if (argc <= 1)
     {
-        DBG_ERROR(_T("get config path failed\r\n"));
-        return -1;
+        if (!GetFullPathRelative("QuicProxyConf.ini", szConfigPath, MAX_PATH))
+        {
+            DBG_ERROR(_T("get config path failed\r\n"));
+            return -1;
+        }
+    }
+    else
+    {
+        strcpy(szConfigPath, argv[1]);
     }
 
     PROXY_ROLE_TYPE roleType = GetRoleType(szConfigPath);
@@ -205,6 +211,8 @@ int main(int argc,char * argv[])
         DBG_ERROR(_T("get role failed\r\n"));
         return -1;
     }
+
+    DBG_ERROR(_T("fuck1\n"));
 
     CHAR ipAddr[64] = { 0 };
     int port = 0;
@@ -220,7 +228,9 @@ int main(int argc,char * argv[])
         DBG_ERROR(_T("ERROR: unknow port\n"));
         return -1;
     }
-    
+
+    DBG_ERROR(_T("fuck1\r\n"));
+
     if (IsServer(roleType))
     {
         ProxyServer(port);

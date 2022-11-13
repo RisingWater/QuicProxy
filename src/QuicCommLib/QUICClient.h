@@ -17,7 +17,7 @@ public:
 
     virtual VOID Disconnect();
 
-    virtual IQUICChannel* CreateChannel(CHAR* ChannelName, WORD Priority);
+    virtual IQUICChannel* CreateChannel(const CHAR* ChannelName, WORD Priority);
     
 private:
     virtual ~CQUICClient();

@@ -48,7 +48,7 @@ public:
 
     virtual VOID Disconnect() = 0;
 
-    virtual IQUICChannel* CreateChannel(CHAR* ChannelName, WORD Priority) = 0;
+    virtual IQUICChannel* CreateChannel(const CHAR* ChannelName, WORD Priority) = 0;
 };
 
 class IQUICServer : public virtual IQUICLink
@@ -56,7 +56,7 @@ class IQUICServer : public virtual IQUICLink
 public:
     virtual VOID Disconnect() = 0;
 
-    virtual IQUICChannel* WaitForChannelReady(CHAR* channelName, HANDLE hStopEvent) = 0;
+    virtual IQUICChannel* WaitForChannelReady(const CHAR* channelName, HANDLE hStopEvent, DWORD TimeOut = 0xFFFFFFFF) = 0;
 };
 
 class IQUICService : public virtual CBaseObject

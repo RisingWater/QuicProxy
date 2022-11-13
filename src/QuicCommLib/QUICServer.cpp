@@ -173,7 +173,7 @@ void CQUICServer::CreateChannel(HQUIC hStream)
     LeaveCriticalSection(&m_csLock);
 }
 
-IQUICChannel* CQUICServer::FindChannelByName(CHAR* ChannelName)
+IQUICChannel* CQUICServer::FindChannelByName(const CHAR* ChannelName)
 {
     std::list<CQUICChannel*>::iterator Itor;
     IQUICChannel* Ret = NULL;
@@ -195,8 +195,9 @@ IQUICChannel* CQUICServer::FindChannelByName(CHAR* ChannelName)
     return Ret;
 }
 
-IQUICChannel* CQUICServer::WaitForChannelReady(CHAR* channelName, HANDLE hStopEvent)
+IQUICChannel* CQUICServer::WaitForChannelReady(const CHAR* channelName, HANDLE hStopEvent, DWORD TimeOut)
 {
+    DWORD WaitTime = 0;
     while (TRUE)
     {
         IQUICChannel* Ret = FindChannelByName(channelName);
@@ -208,6 +209,12 @@ IQUICChannel* CQUICServer::WaitForChannelReady(CHAR* channelName, HANDLE hStopEv
 
         DWORD WaitRet = WaitForSingleObject(hStopEvent, 100);
         if (WaitRet != WAIT_TIMEOUT)
+        {
+            break;
+        }
+
+        WaitTime += 100;
+        if (WaitTime > TimeOut)
         {
             break;
         }

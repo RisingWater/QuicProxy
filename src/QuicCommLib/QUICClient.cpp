@@ -85,7 +85,7 @@ VOID CQUICClient::Disconnect()
     BaseDone();
 }
 
-IQUICChannel* CQUICClient::CreateChannel(CHAR* ChannelName, WORD Priority)
+IQUICChannel* CQUICClient::CreateChannel(const CHAR* ChannelName, WORD Priority)
 {
     CQUICChannel* channel = new CQUICChannel(m_pMsQuic, ChannelName, Priority);
     if (channel)

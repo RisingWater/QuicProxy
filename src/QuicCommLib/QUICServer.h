@@ -21,7 +21,7 @@ class CQUICServer : public IQUICServer, public CQUICLink
 public:
     virtual void Disconnect();
 
-    virtual IQUICChannel* WaitForChannelReady(CHAR* channelName, HANDLE hStopEvent);
+    virtual IQUICChannel* WaitForChannelReady(const CHAR* channelName, HANDLE hStopEvent, DWORD TimeOut = 0xFFFFFFFF);
     
 private:
     CQUICServer(HQUIC hConnection, const QUIC_API_TABLE* pMsQuic, CQUICService* pService);
@@ -40,7 +40,7 @@ private:
 
     void CreateChannel(HQUIC Stream);
 
-    IQUICChannel* FindChannelByName(CHAR* ChannelName);
+    IQUICChannel* FindChannelByName(const CHAR* ChannelName);
 
     const QUIC_API_TABLE*         m_pMsQuic;
     

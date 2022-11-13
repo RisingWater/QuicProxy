@@ -6,8 +6,8 @@
 #include <list>
 
 class CSocketProxy;
-class CQUICServer;
-class IQUICCommunication;
+class IQUICServer;
+class IQUICChannel;
 
 class CProxySession : public CBaseObject
 {
@@ -41,7 +41,7 @@ private:
 class CSocketProxy : public CBaseObject
 {
 public:
-    CSocketProxy(CQUICServer* quicChannel);
+    CSocketProxy(IQUICServer* quicChannel);
 
 	virtual ~CSocketProxy();
 
@@ -54,9 +54,9 @@ public:
 	void SendDisconnectToProxy(GUID guid);
 
 private:
-    static BOOL QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCommunication* quic, CBaseObject* Param);
+    static BOOL QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param);
 
-    static VOID QUICDisconnectedProcess(IQUICCommunication* quic, CBaseObject* Param);
+    static VOID QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param);
 
     void SocketRecvCallback(PBYTE buffer, DWORD len);
 
@@ -68,10 +68,15 @@ private:
 
 	std::list<CProxySession*> m_SessionList;
 
-    CQUICServer* m_pQuicChannel;
+    IQUICServer*  m_pQuicServer;
+
+    IQUICChannel* m_pQuicChannel;
 
 	CRITICAL_SECTION m_csLock;
+
     CRITICAL_SECTION m_csQuicLock;
+
+    HANDLE m_hStopEvent;
 };
 
 #endif
