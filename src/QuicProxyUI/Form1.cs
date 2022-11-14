@@ -163,10 +163,10 @@ namespace QuicProxyUI
 
             ServerProcess.Start();
 
-            ServerProcess.BeginOutputReadLine();
             while (!ServerProcess.StandardOutput.EndOfStream)
             {
                 string line = ServerProcess.StandardOutput.ReadLine();
+                Log(line);
             }
 
             UpdateUI(false);
@@ -254,6 +254,14 @@ namespace QuicProxyUI
         }
 
         private void ClientStopButton_Click(object sender, EventArgs e)
+        {
+            if (ServerProcess != null)
+            {
+                ServerProcess.Kill();
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (ServerProcess != null)
             {

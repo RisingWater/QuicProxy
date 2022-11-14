@@ -11,8 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A5F27967-B008-48C1-8408-272B8CECA454}</ProjectGuid>
-    <RootNamespace>QuicProxy</RootNamespace>
+    <ProjectGuid>{B09C7CE4-010E-4378-A2AD-4870B546B5BC}</ProjectGuid>
+    <RootNamespace>LogEx</RootNamespace>
+    <ProjectName>libLogEx</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -22,7 +23,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -52,48 +53,30 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./;$(SolutionDir)include/libQuicComm;$(SolutionDir)include/libLogEx;$(SolutionDir)include/BaseObject;$(SolutionDir)include/corelib;$(SolutionDir)include/EnhanceLib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include/BaseObject;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>LogEx.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="ProxyProcessor.cpp" />
-    <ClCompile Include="ProxyService.cpp" />
-    <ClCompile Include="ClientSession.cpp" />
-    <ClCompile Include="SocketProxy.cpp" />
+    <ClCompile Include="log.cpp" />
+    <ClCompile Include="LogEx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ProxyProcessor.h" />
-    <ClInclude Include="ProxyService.h" />
-    <ClInclude Include="ClientSession.h" />
-    <ClInclude Include="SocketProxy.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="LogEx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\corelib\corelib.vcxproj">
-      <Project>{6162410e-47fd-4b76-9d7d-37be6a41293a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\EnhanceLib\EnhanceLib.vcxproj">
-      <Project>{4c30fb2e-7e5d-4e4f-ab23-e0f0ce6911d3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\LogEx\LogEx.vcxproj">
-      <Project>{b09c7ce4-010e-4378-a2ad-4870b546b5bc}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\QuicCommLib\QuicCommLib.vcxproj">
-      <Project>{a43bce43-1963-4f87-b3fa-8cf977567ec0}</Project>
-    </ProjectReference>
+    <None Include="LogEx.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

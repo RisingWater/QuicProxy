@@ -60,7 +60,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)include/BaseObject;$(SolutionDir)include/corelib;$(SolutionDir)3rdparty/msquic/include;$(SolutionDir)include/EnhanceLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include/BaseObject;$(SolutionDir)include/libLogEx;$(SolutionDir)include/corelib;$(SolutionDir)3rdparty/msquic/include;$(SolutionDir)include/EnhanceLib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -99,6 +99,9 @@
     </ProjectReference>
     <ProjectReference Include="..\EnhanceLib\EnhanceLib.vcxproj">
       <Project>{4c30fb2e-7e5d-4e4f-ab23-e0f0ce6911d3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\LogEx\LogEx.vcxproj">
+      <Project>{b09c7ce4-010e-4378-a2ad-4870b546b5bc}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

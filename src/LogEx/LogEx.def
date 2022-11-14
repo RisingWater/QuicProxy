@@ -1,0 +1,8 @@
+﻿LIBRARY libLogEx
+EXPORTS LogEx_Init
+        LogEx_Dump
+		LogEx_SetModuleName
+		LogEx_GetModuleName
+		LogEx_Printf
+		LogEx_Done
+		

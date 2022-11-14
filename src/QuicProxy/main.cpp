@@ -188,6 +188,9 @@ void ProxyClient(CHAR* ConfigPath, CHAR* address, int port)
 
 int main(int argc,char * argv[])
 {
+    LogEx_Init(_T("stdio"), LOG_LEVEL_TRACE);
+    LogEx_SetModuleName(_T("QuicProxy"));
+
     g_StopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     CHAR szConfigPath[MAX_PATH] = { 0 };
 
@@ -212,8 +215,6 @@ int main(int argc,char * argv[])
         return -1;
     }
 
-    DBG_ERROR(_T("fuck1\n"));
-
     CHAR ipAddr[64] = { 0 };
     int port = 0;
 
@@ -228,8 +229,6 @@ int main(int argc,char * argv[])
         DBG_ERROR(_T("ERROR: unknow port\n"));
         return -1;
     }
-
-    DBG_ERROR(_T("fuck1\r\n"));
 
     if (IsServer(roleType))
     {
