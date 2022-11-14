@@ -182,3 +182,38 @@ void CQUICLink::DestoryChannel(IQUICChannel* pChannel)
 
     LeaveCriticalSection(&m_csLock);
 }
+
+void CQUICLink::LinkDisconnectNotify()
+{
+    EnterCriticalSection(&m_csLock);
+
+    if (m_pfnDisconnectProcess)
+    {
+        m_pfnDisconnectProcess(this, m_pParam);
+    }
+
+    LeaveCriticalSection(&m_csLock);
+
+    return;
+}
+
+VOID CQUICLink::RegisterEndProcess(_QUICLinkDisconnectedProcess Process, CBaseObject* Param)
+{
+    CBaseObject* pOldParam = NULL;
+
+    EnterCriticalSection(&m_csLock);
+    m_pfnDisconnectProcess = Process;
+
+    pOldParam = m_pParam;
+    m_pParam = Param;
+    if (m_pParam)
+    {
+        m_pParam->AddRef();
+    }
+    LeaveCriticalSection(&m_csLock);
+
+    if (pOldParam)
+    {
+        pOldParam->Release();
+    }
+}

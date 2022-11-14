@@ -188,6 +188,7 @@ QUIC_STATUS CQUICClient::ClientConnectionCallback(
                 if (!Event->SHUTDOWN_COMPLETE.AppCloseInProgress)
                 {
                     pClient->m_pMsQuic->ConnectionClose(Connection);
+                    pClient->LinkDisconnectNotify();
                 }
             }
             break;

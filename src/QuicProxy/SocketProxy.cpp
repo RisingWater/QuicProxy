@@ -230,13 +230,14 @@ BOOL CSocketProxy::Init()
 {
     EnterCriticalSection(&m_csQuicLock);
 
+    m_pQuicServer->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
+
     if (m_pQuicServer)
     {
         m_pQuicChannel = m_pQuicServer->WaitForChannelReady("control", m_hStopEvent, 5000);
         if (m_pQuicChannel)
         {
             m_pQuicChannel->RegisterRecvProcess(CSocketProxy::QUICServerRecvPacketProcess, this);
-            m_pQuicChannel->RegisterEndProcess(CSocketProxy::QUICDisconnectedProcess, this);
         }
         m_pQuicServer->SendCtrlPacket((PBYTE)"ctrl channel init ok", strlen("ctrl channel init ok") + 1);
     }
@@ -351,7 +352,7 @@ BOOL CSocketProxy::QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICCh
     return TRUE;
 }
 
-VOID CSocketProxy::QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param)
+VOID CSocketProxy::QUICDisconnectedProcess(IQUICLink* quic, CBaseObject* Param)
 {
     CSocketProxy* proxy = dynamic_cast<CSocketProxy*>(Param);
 

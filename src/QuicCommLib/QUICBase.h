@@ -51,7 +51,10 @@ public:
 
     virtual void DestoryChannel(IQUICChannel* channel);
 
+    virtual VOID RegisterEndProcess(_QUICLinkDisconnectedProcess Process, CBaseObject* Param);
+
 protected:
+    void LinkDisconnectNotify();
 
     void LinkDone();
 
@@ -60,6 +63,10 @@ protected:
     std::list<CQUICChannel*> m_Streams;
 
     CQUICCtrlChannel* m_pCtrlChannel;
+
+    _QUICLinkDisconnectedProcess m_pfnDisconnectProcess;
+
+    CBaseObject* m_pParam;
 };
 
 #endif

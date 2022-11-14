@@ -6,6 +6,7 @@
 #include <list>
 
 class CSocketProxy;
+class IQUICLink;
 class IQUICServer;
 class IQUICChannel;
 
@@ -56,7 +57,7 @@ public:
 private:
     static BOOL QUICServerRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param);
 
-    static VOID QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param);
+    static VOID QUICDisconnectedProcess(IQUICLink* quic, CBaseObject* Param);
 
     void SocketRecvCallback(PBYTE buffer, DWORD len);
 

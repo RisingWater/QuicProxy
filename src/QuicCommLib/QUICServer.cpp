@@ -115,6 +115,7 @@ QUIC_STATUS CQUICServer::ServerConnectionCallback(
         if (pServer)
         {
             pServer->m_pMsQuic->ConnectionClose(Connection);
+            pServer->LinkDisconnectNotify();
             pServer->Release();
         }
         break;

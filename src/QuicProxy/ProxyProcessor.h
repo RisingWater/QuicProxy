@@ -11,6 +11,7 @@
 
 class IQUICClient;
 class IQUICChannel;
+class IQUICLink;
 class CProxyService;
 class CClientSession;
 
@@ -40,7 +41,7 @@ public:
 private:
     static BOOL QUICClientRecvPacketProcess(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param);
 
-    static VOID QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param);
+    static VOID QUICDisconnectedProcess(IQUICLink* quic, CBaseObject* Param);
     
     CClientSession* FindSessionByGUID(GUID guid);
 

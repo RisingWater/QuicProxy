@@ -61,13 +61,14 @@ BOOL CProxyProcessor::Init(CHAR* szConfigPath)
     BOOL InitOK = FALSE;
     EnterCriticalSection(&m_csQuicLock);
 
+    m_pQuicClient->RegisterEndProcess(CProxyProcessor::QUICDisconnectedProcess, this);
+
     if (m_pQuicClient->Connect())
 	{
         m_pQuicChannel = m_pQuicClient->CreateChannel("control", 0);
         if (m_pQuicChannel)
         {
             m_pQuicChannel->RegisterRecvProcess(CProxyProcessor::QUICClientRecvPacketProcess, this);
-            m_pQuicChannel->RegisterEndProcess(CProxyProcessor::QUICDisconnectedProcess, this);
         }
 
         DWORD len = 0;
@@ -225,7 +226,7 @@ void CProxyProcessor::Done()
     LeaveCriticalSection(&m_csQuicLock);
 }
 
-VOID CProxyProcessor::QUICDisconnectedProcess(IQUICChannel* quic, CBaseObject* Param)
+VOID CProxyProcessor::QUICDisconnectedProcess(IQUICLink* quic, CBaseObject* Param)
 {
     CProxyProcessor* proxy = dynamic_cast<CProxyProcessor*>(Param);
 

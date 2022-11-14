@@ -11,9 +11,13 @@
 
 class IQUICChannel;
 
+class IQUICLink;
+
 typedef BOOL(*_QUICRecvPacketProcess)(PBYTE Data, DWORD Length, IQUICChannel* quic, CBaseObject* Param);
 
 typedef void(*_QUICDisconnectedProcess)(IQUICChannel* s, CBaseObject* pParam);
+
+typedef void(*_QUICLinkDisconnectedProcess)(IQUICLink* s, CBaseObject* pParam);
 
 class IQUICChannel : public virtual CBaseObject
 {
@@ -39,6 +43,8 @@ public:
     virtual void FreeRecvedCtrlPacket(PBYTE Data) = 0;
 
     virtual void DestoryChannel(IQUICChannel* channel) = 0;
+
+    virtual VOID RegisterEndProcess(_QUICLinkDisconnectedProcess Process, CBaseObject* Param) = 0;
 };
 
 class IQUICClient : public virtual IQUICLink
