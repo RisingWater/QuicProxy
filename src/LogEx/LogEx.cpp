@@ -1,4 +1,5 @@
 #pragma warning(disable:4996)
+#include <stdarg.h>
 #include "log.h"
 #include "LogEx.h"
 

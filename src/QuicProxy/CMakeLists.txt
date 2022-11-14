@@ -7,6 +7,7 @@ LIST(APPEND INCLUDE_DIR
     ./
     ../QuicCommLib
     ${CMAKE_SOURCE_DIR}/include/BaseObject
+    ${CMAKE_SOURCE_DIR}/include/libLogEx
     ${CMAKE_SOURCE_DIR}/include/EnhanceLib
     ${CMAKE_SOURCE_DIR}/3rdparty/msquic/include
     ${WINPR_INCLUDE}
@@ -28,7 +29,8 @@ LIST(APPEND SRC_FILES
 ADD_EXECUTABLE(${TARGET} ${SRC_FILES})
 
 TARGET_LINK_LIBRARIES(${TARGET}
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libQuicCommLib.a
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libQuicComm.so
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libLogEx.so
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libEnhanceLib.a
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libcorelib.a
     ${WINPR_PATH}/lib/${LIB_PLATFORM}/libwinpr3.a

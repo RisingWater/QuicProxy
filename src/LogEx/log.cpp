@@ -56,7 +56,7 @@ BOOL CLogWriter::LogInit(DWORD loglevel, const TCHAR* LogPath, BOOL append)
         return FALSE;
     }
 
-    _tcsncpy(m_szLogPath, LogPath, MAX_PATH);
+    _tcscpy(m_szLogPath, LogPath);
 
     if (_tcscmp(m_szLogPath, _T("stdio")) == 0)
     {
@@ -73,9 +73,12 @@ BOOL CLogWriter::LogInit(DWORD loglevel, const TCHAR* LogPath, BOOL append)
         fprintf(stderr, "now all the running-information are going to put to dbgport\n");
         return TRUE;
     }
-#endif
 
     m_hFileHandle = _tfopen(m_szLogPath, append ? _T("a") : _T("w"));
+#else
+    m_hFileHandle = fopen(m_szLogPath, append ? ("a") : ("w"));
+#endif
+
     if (m_hFileHandle == NULL)
     {
         fprintf(stderr, "cannot open log file,file location is %s\n", m_szLogPath);
@@ -145,8 +148,8 @@ int CLogWriter::PremakeString(CHAR* pBuffer,
     struct tm vtm;
     int ThreadId = GetCurrentThreadId();
 
-    UNREFERENCED_PARAMETER(line);
-    UNREFERENCED_PARAMETER(FileName);
+    line;
+    FileName;
 
 #ifdef WIN32
     localtime_s(&vtm, &now);

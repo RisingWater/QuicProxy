@@ -5,6 +5,7 @@ SET(WINPR_INCLUDE ${WINPR_PATH}/include)
 
 LIST(APPEND INCLUDE_DIR
     ${CMAKE_SOURCE_DIR}/include/corelib
+    ${CMAKE_SOURCE_DIR}/include/libLogEx
     ${CMAKE_SOURCE_DIR}/include/BaseObject
     ${WINPR_INCLUDE}
     )

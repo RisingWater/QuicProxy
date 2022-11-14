@@ -8,6 +8,7 @@
 #include <tchar.h>
 #else
 #include <winpr/wtypes.h>
+#include <winpr/tchar.h>
 #endif
 
 #ifndef MODULE_NAME

@@ -7,6 +7,12 @@
 #include <Windows.h>
 #else
 #include <winpr/wtypes.h>
+#include <winpr/tchar.h>
+#include <winpr/interlocked.h>
+#include <winpr/file.h>
+#include <winpr/synch.h>
+#include <winpr/thread.h>
+#include <sys/errno.h>
 #endif
 
 #include <stdio.h>
