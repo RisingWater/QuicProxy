@@ -28,6 +28,8 @@ public:
 
     virtual BOOL SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle = NULL) = 0;
 
+    virtual BOOL SendPacketSync(PBYTE Data, DWORD Length) = 0;
+
     virtual VOID RegisterRecvProcess(_QUICRecvPacketProcess Process, CBaseObject* Param) = 0;
 
     virtual VOID RegisterEndProcess(_QUICDisconnectedProcess Process, CBaseObject* Param) = 0;
@@ -63,6 +65,8 @@ public:
     virtual VOID Disconnect() = 0;
 
     virtual IQUICChannel* WaitForChannelReady(const CHAR* channelName, HANDLE hStopEvent, DWORD TimeOut = 0xFFFFFFFF) = 0;
+
+    virtual BOOL GetRemotePeerInfo(CHAR* Address, DWORD* Port) = 0;
 };
 
 class IQUICService : public virtual CBaseObject

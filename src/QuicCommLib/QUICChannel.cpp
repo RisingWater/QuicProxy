@@ -123,6 +123,12 @@ BOOL CQUICChannel::Init(HQUIC hConnection)
         strcpy((char*)pkt.ChannelName, m_szChannelName);
         pkt.Priority = m_wPriority;
 
+#ifdef UNICODE
+        DBG_TRACE(_T("QUICChannel Send Channel Name %S\n"), m_szChannelName);
+#else
+        DBG_TRACE(_T("QUICChannel Send Channel Name %s\n"), m_szChannelName);
+#endif
+
         DoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
         if (SendPacket((PBYTE)&pkt, sizeof(CHANNEL_INIT_PKT), DoneEvent))
         {
@@ -247,6 +253,21 @@ QUIC_STATUS CQUICChannel::ClientStreamCallback(
     return QUIC_STATUS_SUCCESS;
 }
 
+BOOL CQUICChannel::SendPacketSync(PBYTE Data, DWORD Length)
+{
+    HANDLE DoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    BOOL Ret = SendPacket(Data, Length, DoneEvent);
+
+    if (Ret)
+    {
+        WaitForSingleObject(DoneEvent, INFINITE);
+    }
+
+    CloseHandle(DoneEvent);
+
+    return Ret;
+}
+
 BOOL CQUICChannel::SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle)
 {
     return SendPacket(Data, Length, SyncHandle, QUIC_SEND_FLAG_NONE);
@@ -285,6 +306,12 @@ void CQUICChannel::ProcessRecvEvent(QUIC_STREAM_EVENT* RecvEvent)
                 CHANNEL_INIT_PKT* ChannelInit = (CHANNEL_INIT_PKT*)pkt->Data;
                 strcpy(m_szChannelName, (char*)ChannelInit->ChannelName);
                 m_wPriority = ChannelInit->Priority;
+
+#ifdef UNICODE
+                DBG_TRACE(_T("QUICChannel Recv Channel Name %S\n"), m_szChannelName);
+#else
+                DBG_TRACE(_T("QUICChannel Recv Channel Name %s\n"), m_szChannelName);
+#endif
 
                 m_iChannelId = InterlockedIncrement(&g_ChannelId);
                 m_bHasChannelInfo = TRUE;

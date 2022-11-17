@@ -170,6 +170,8 @@ namespace QuicProxyUI
             }
 
             UpdateUI(false);
+
+            ServerProcess = null;
         }
 
         private void ServerStartButton_Click(object sender, EventArgs e)

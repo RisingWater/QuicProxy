@@ -99,7 +99,10 @@ CQUICLink::~CQUICLink()
 void CQUICLink::LinkDone()
 {
     std::list<CQUICChannel*>::iterator Itor;
+
     EnterCriticalSection(&m_csLock);
+
+    RegisterEndProcess(NULL, NULL);
 
     for (Itor = m_Streams.begin(); Itor != m_Streams.end(); Itor++)
     {
@@ -147,6 +150,7 @@ void CQUICLink::FreeRecvedCtrlPacket(PBYTE Data)
     CQUICCtrlChannel* channel = NULL;
 
     EnterCriticalSection(&m_csLock);
+
     if (m_pCtrlChannel)
     {
         channel = m_pCtrlChannel;

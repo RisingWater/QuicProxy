@@ -39,6 +39,8 @@ public:
 
     virtual BOOL SendPacket(PBYTE Data, DWORD Length, HANDLE SyncHandle = NULL);
 
+    virtual BOOL SendPacketSync(PBYTE Data, DWORD Length);
+
     virtual VOID RegisterRecvProcess(_QUICRecvPacketProcess Process, CBaseObject* Param);
 
     virtual VOID RegisterEndProcess(_QUICDisconnectedProcess Process, CBaseObject* Param);

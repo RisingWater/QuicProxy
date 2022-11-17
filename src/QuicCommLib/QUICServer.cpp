@@ -211,15 +211,53 @@ IQUICChannel* CQUICServer::WaitForChannelReady(const CHAR* channelName, HANDLE h
         DWORD WaitRet = WaitForSingleObject(hStopEvent, 100);
         if (WaitRet != WAIT_TIMEOUT)
         {
+            DBG_ERROR(_T("WaitForChannelReady WaitForSingleObject failed %d\n"), WaitRet);
             break;
         }
 
         WaitTime += 100;
         if (WaitTime > TimeOut)
         {
+            DBG_ERROR(_T("WaitForChannelReady timeout\n"));
             break;
         }
     }
 
     return NULL;
+}
+
+BOOL CQUICServer::GetRemotePeerInfo(CHAR* pAddress, DWORD* pdwPort)
+{
+    QUIC_ADDR addr;
+    uint32_t addrLen = sizeof(addr);
+    QUIC_ADDR_STR addrStr = { 0 };
+
+    QUIC_STATUS status = m_pMsQuic->GetParam(
+        m_hConnection,
+        QUIC_PARAM_CONN_REMOTE_ADDRESS,
+        &addrLen,
+        &addr);
+
+    if (QUIC_SUCCEEDED(status))
+    {
+        QuicAddrToString(&addr, &addrStr);
+
+        *pdwPort = 0;
+
+        CHAR* p = strchr(addrStr.Address, _T(':'));
+        if (p != NULL)
+        {
+            *pdwPort = strtol(p + 1, NULL, 10);
+            *p = 0;
+        }
+
+        if (pAddress)
+        {
+            strcpy(pAddress, addrStr.Address);
+        }
+
+        return TRUE;
+    }
+
+    return FALSE;
 }

@@ -23,6 +23,8 @@ public:
 
     virtual IQUICChannel* WaitForChannelReady(const CHAR* channelName, HANDLE hStopEvent, DWORD TimeOut = 0xFFFFFFFF);
     
+    virtual BOOL GetRemotePeerInfo(CHAR* Address, DWORD* Port);
+    
 private:
     CQUICServer(HQUIC hConnection, const QUIC_API_TABLE* pMsQuic, CQUICService* pService);
 

@@ -48,7 +48,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.ClientPortLabel = new System.Windows.Forms.Label();
             this.logBox = new System.Windows.Forms.ListBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.LogGroup = new System.Windows.Forms.GroupBox();
+            this.configGroup = new System.Windows.Forms.GroupBox();
             this.ControlTab.SuspendLayout();
             this.ProxyServerTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ServerPortInput)).BeginInit();
@@ -56,16 +57,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.LocalPort)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.RemoteTCPPortInput)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ClientProxyPort)).BeginInit();
+            this.LogGroup.SuspendLayout();
+            this.configGroup.SuspendLayout();
             this.SuspendLayout();
             // 
             // ControlTab
             // 
             this.ControlTab.Controls.Add(this.ProxyServerTab);
             this.ControlTab.Controls.Add(this.ProxyClientTab);
-            this.ControlTab.Location = new System.Drawing.Point(13, 13);
+            this.ControlTab.Location = new System.Drawing.Point(6, 15);
             this.ControlTab.Name = "ControlTab";
             this.ControlTab.SelectedIndex = 0;
-            this.ControlTab.Size = new System.Drawing.Size(559, 178);
+            this.ControlTab.Size = new System.Drawing.Size(543, 174);
             this.ControlTab.TabIndex = 0;
             this.ControlTab.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.ControlTab_Selecting);
             // 
@@ -78,7 +81,7 @@
             this.ProxyServerTab.Location = new System.Drawing.Point(4, 22);
             this.ProxyServerTab.Name = "ProxyServerTab";
             this.ProxyServerTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ProxyServerTab.Size = new System.Drawing.Size(551, 152);
+            this.ProxyServerTab.Size = new System.Drawing.Size(535, 148);
             this.ProxyServerTab.TabIndex = 0;
             this.ProxyServerTab.Text = "代理服务器";
             this.ProxyServerTab.UseVisualStyleBackColor = true;
@@ -86,7 +89,7 @@
             // ServerStopButton
             // 
             this.ServerStopButton.Enabled = false;
-            this.ServerStopButton.Location = new System.Drawing.Point(457, 37);
+            this.ServerStopButton.Location = new System.Drawing.Point(440, 37);
             this.ServerStopButton.Name = "ServerStopButton";
             this.ServerStopButton.Size = new System.Drawing.Size(75, 21);
             this.ServerStopButton.TabIndex = 3;
@@ -96,7 +99,7 @@
             // 
             // ServerStartButton
             // 
-            this.ServerStartButton.Location = new System.Drawing.Point(457, 10);
+            this.ServerStartButton.Location = new System.Drawing.Point(440, 9);
             this.ServerStartButton.Name = "ServerStartButton";
             this.ServerStartButton.Size = new System.Drawing.Size(75, 21);
             this.ServerStartButton.TabIndex = 2;
@@ -148,7 +151,7 @@
             this.ProxyClientTab.Location = new System.Drawing.Point(4, 22);
             this.ProxyClientTab.Name = "ProxyClientTab";
             this.ProxyClientTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ProxyClientTab.Size = new System.Drawing.Size(551, 152);
+            this.ProxyClientTab.Size = new System.Drawing.Size(535, 148);
             this.ProxyClientTab.TabIndex = 1;
             this.ProxyClientTab.Text = "代理客户端";
             this.ProxyClientTab.UseVisualStyleBackColor = true;
@@ -156,7 +159,7 @@
             // ClientStopButton
             // 
             this.ClientStopButton.Enabled = false;
-            this.ClientStopButton.Location = new System.Drawing.Point(457, 37);
+            this.ClientStopButton.Location = new System.Drawing.Point(440, 37);
             this.ClientStopButton.Name = "ClientStopButton";
             this.ClientStopButton.Size = new System.Drawing.Size(75, 21);
             this.ClientStopButton.TabIndex = 12;
@@ -237,7 +240,7 @@
             // 
             // ClientStartButton
             // 
-            this.ClientStartButton.Location = new System.Drawing.Point(457, 9);
+            this.ClientStartButton.Location = new System.Drawing.Point(440, 9);
             this.ClientStartButton.Name = "ClientStartButton";
             this.ClientStartButton.Size = new System.Drawing.Size(75, 21);
             this.ClientStartButton.TabIndex = 5;
@@ -293,28 +296,38 @@
             this.logBox.FormattingEnabled = true;
             this.logBox.HorizontalScrollbar = true;
             this.logBox.ItemHeight = 12;
-            this.logBox.Location = new System.Drawing.Point(13, 222);
+            this.logBox.Location = new System.Drawing.Point(6, 15);
             this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(555, 280);
+            this.logBox.Size = new System.Drawing.Size(543, 256);
             this.logBox.TabIndex = 1;
             // 
-            // label4
+            // LogGroup
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(13, 204);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 12);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "运行日志";
+            this.LogGroup.Controls.Add(this.logBox);
+            this.LogGroup.Location = new System.Drawing.Point(13, 217);
+            this.LogGroup.Name = "LogGroup";
+            this.LogGroup.Size = new System.Drawing.Size(555, 282);
+            this.LogGroup.TabIndex = 3;
+            this.LogGroup.TabStop = false;
+            this.LogGroup.Text = "运行日志";
+            // 
+            // configGroup
+            // 
+            this.configGroup.Controls.Add(this.ControlTab);
+            this.configGroup.Location = new System.Drawing.Point(13, 13);
+            this.configGroup.Name = "configGroup";
+            this.configGroup.Size = new System.Drawing.Size(555, 196);
+            this.configGroup.TabIndex = 4;
+            this.configGroup.TabStop = false;
+            this.configGroup.Text = "代理配置";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 511);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.logBox);
-            this.Controls.Add(this.ControlTab);
+            this.Controls.Add(this.configGroup);
+            this.Controls.Add(this.LogGroup);
             this.MaximumSize = new System.Drawing.Size(600, 550);
             this.MinimumSize = new System.Drawing.Size(600, 550);
             this.Name = "Form1";
@@ -329,8 +342,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.LocalPort)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.RemoteTCPPortInput)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ClientProxyPort)).EndInit();
+            this.LogGroup.ResumeLayout(false);
+            this.configGroup.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -356,7 +370,8 @@
         private System.Windows.Forms.Button ServerStopButton;
         private System.Windows.Forms.ListBox logBox;
         private System.Windows.Forms.Button ClientStopButton;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.GroupBox LogGroup;
+        private System.Windows.Forms.GroupBox configGroup;
     }
 }
 
